@@ -6,12 +6,15 @@ require 'dataflow/version'
 Gem::Specification.new do |spec|
   spec.name          = 'dataflow-rb'
   spec.version       = Dataflow::VERSION
-  spec.authors       = ['okoriko']
+  spec.authors       = ['Eurico Doirado']
   spec.email         = ['eurico@phybbit.com']
 
   spec.summary       = %q{Helps building data and automation pipelines. It handles recomputing dependencies and parallel execution.}
   spec.description   = %q{Helps building data pipelines. It handles recomputing dependencies and parallel execution.}
   spec.homepage      = 'https://phybbit.com'
+  spec.license       = 'MIT'
+
+  spec.required_ruby_version = '>= 2.3.0'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = 'exe'

@@ -31,9 +31,51 @@ Or install it yourself as:
 
     $ gem install dataflow-rb
 
+You also need to install:
+- mongodb 3.2 (required)
+- postgresql (optional)
+- mysql (optional)
+
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+require 'dataflow-rb'
+
+# Create a data node
+node1 = Dataflow::Nodes::DataNode.create(db_name: 'test', name: 'data_source1')
+node1.add(records: [{id: 1, first_name: 'hello'}])
+node1.all
+# => [{"id"=>1, "name"=>"test"}]
+
+node2 = Dataflow::Nodes::DataNode.create(db_name: 'test', name: 'data_source2')
+node2.add(records: [{id: 1, last_name: 'world'}])
+node2.all
+# => [{"id"=>1, "name"=>"world"}]
+
+# We will keep the results of the computation in this dataset
+result_node = Dataflow::Nodes::DataNode.create(db_name: 'test', name: 'result')
+
+# Join the 2 datasets by id:
+compute_node = Dataflow::Nodes::JoinNode.create(
+  name: 'join',
+  dependency_ids: [node1, node2],
+  data_node_id: result_node,
+  key1: 'id',
+  key2: 'id'
+)
+compute_node.compute
+compute_node.data_node.all
+# => [{"id"=>1, "first_name"=>"hello", "last_name"=>"world"}]
+compute_node.all # this is just a facade for the above
+# => [{"id"=>1, "first_name"=>"hello", "last_name"=>"world"}]
+
+# Fetch the data again later:
+result_node = Dataflow::Nodes::DataNode.find_by(name: 'result')
+# or the short hand:
+result_node = Dataflow.data_node('result')
+result_node.all
+# => [{"id"=>1, "first_name"=>"hello", "last_name"=>"world"}]
+```
 
 ## Development
 

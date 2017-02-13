@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Phybbit/dataflow-rb.svg?branch=master)](https://travis-ci.org/Phybbit/dataflow-rb)
+
 # Dataflow
 
 The purpose of this gem is to help building complex dataflows and support automating long-running batch processes.

@@ -269,7 +269,7 @@ RSpec.shared_examples 'adapter #save' do |use_sym: false|
       expect(adapter.count).to eq dummy_data.count
     end
 
-    it 'keeps adding even if one entry fails due do dup keeps' do
+    it 'keeps adding even if one entry fails due to duplicates' do
       adapter.create_indexes
       adapter.save(records: dummy_data)
 

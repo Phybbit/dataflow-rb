@@ -1,4 +1,17 @@
+dist: trusty
+sudo: required
 language: ruby
 rvm:
-  - 2.3.3
-before_install: gem install bundler -v 1.14.3
+  - 2.3.1
+before_install:
+  - gem install bundler -v 1.14.3
+  - mysql -e 'CREATE DATABASE dataflow_test;'
+  - psql -c 'create database dataflow_test;' -U postgres
+services:
+  - mongodb
+  - mysql
+  - postgresql
+env:
+  - MOJACO_MYSQL_USER=root MOJACO_POSTGRESQL_USER=postgres
+addons:
+    postgresql: "9.6"

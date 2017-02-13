@@ -21,8 +21,8 @@ module Dataflow
           when 'postgresql'
             host = ENV['MOJACO_POSTGRESQL_ADDRESS'] || '127.0.0.1'
             port = ENV['MOJACO_POSTGRESQL_PORT'] || '5432'
-            user = ENV['MOJACO_POSTGRESQL_USER'] || 'eurico'
-            password = ENV['MOJACO_POSTGRESQL_PASSWORD'] || 'eurico'
+            user = ENV['MOJACO_POSTGRESQL_USER']
+            password = ENV['MOJACO_POSTGRESQL_PASSWORD']
           end
 
           db_name ||= settings.db_name

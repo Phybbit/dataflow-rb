@@ -8,8 +8,8 @@ require 'byebug'
 require 'timecop'
 require 'dataflow-rb'
 
-MysqlTestClient = Sequel.connect('mysql2://root@localhost/dataflow_test')
-PostgresqlTestClient = Sequel.connect('postgresql://eurico:eurico@localhost/dataflow_test')
+MysqlTestClient = Sequel.connect("mysql2://#{ENV['MOJACO_MYSQL_USER']}:#{ENV['MOJACO_MYSQL_PASSWORD']}@localhost/dataflow_test")
+PostgresqlTestClient = Sequel.connect("postgresql://#{ENV['MOJACO_POSTGRESQL_USER']}:#{ENV['MOJACO_POSTGRESQL_PASSWORD']}@localhost/dataflow_test")
 
 require 'adapters/adapter_shared_examples'
 

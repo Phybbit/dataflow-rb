@@ -275,4 +275,81 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
       data_node_id: make_data_node('data')
     )
   end
+
+  context 'POSTGRESQL join' do
+    before do
+      node1.add(records: pg_dataset1)
+      node2.add(records: pg_dataset2)
+    end
+
+    it 'joins the datasets' do
+      join_node.compute
+      expect(join_node.all).to eq(pg_result)
+    end
+
+    let (:node1) do
+      make_data_node('pg_data1',
+                     db_backend: :postgresql,
+                     schema: {
+                       id1: { type: 'integer' },
+                       first_name: { type: 'string' }
+                     })
+    end
+
+    let (:node2) do
+      make_data_node('pg_data2',
+                     db_backend: :postgresql,
+                     schema: {
+                       id2: { type: 'integer' },
+                       last_name: { type: 'string' }
+                     })
+    end
+
+    let (:join_node) do
+      Dataflow::Nodes::JoinNode.create(
+        name: 'join_node',
+        dependency_ids: [node1, node2],
+        key1: 'id1',
+        key2: 'id2',
+        data_node_id: make_data_node('pg_result', db_backend: :postgresql)
+      )
+    end
+
+    let (:pg_dataset1) do
+      [
+        {
+          id1: 1,
+          first_name: 'hello'
+        },
+        {
+          id1: 2,
+          first_name: 'ignored'
+        }
+      ]
+    end
+
+    let (:pg_dataset2) do
+      [
+        {
+          id2: 1,
+          last_name: 'world'
+        },
+        {
+          id2: 3,
+          last_name: 'ignored'
+        }
+      ]
+    end
+
+    let (:pg_result) do
+      [
+        {
+          id1: 1,
+          id2: 1,
+          first_name: 'hello',
+          last_name: 'world'
+        }
+      ]
+    end
+  end
 end

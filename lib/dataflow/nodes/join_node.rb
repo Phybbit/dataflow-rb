@@ -52,7 +52,7 @@ module Dataflow
 
       private
 
-      def execute_sql_join
+      def sql_join_query
         fields = required_schema.keys
         select_keys = dependencies[0].schema.keys.map { |x| "d1.#{x}" } + (dependencies[1].schema.keys - dependencies[0].schema.keys).map { |x| "d2.#{x}" }
         query = "INSERT INTO #{write_dataset_name} (#{fields.join(',')})
@@ -60,9 +60,15 @@ module Dataflow
                  FROM #{dependencies[0].read_dataset_name} as d1
                  INNER JOIN #{dependencies[1].read_dataset_name} as d2
                  ON d1.#{key1} = d2.#{key2}"
-        p query
-        db_adapter.client[query].to_a
       end
+
+      def execute_sql_join
+        query = sql_join_query
+        # TODO: work on a better way to interface this
+        sql_adapter = data_node.send(:db_adapter)
+        sql_adapter.client[query].to_a
+      end
+
 
       def compute_batch(records:)
         join(n1_records: records)

@@ -8,6 +8,10 @@ require 'byebug'
 require 'timecop'
 require 'dataflow-rb'
 
+unless ENV['MOJACO_MYSQL_USER'] && ENV['MOJACO_POSTGRESQL_USER']
+  raise 'Please set MOJACO_MYSQL_USER and MOJACO_POSTGRESQL_USER in your .env.test. Also set the password if needed.'
+end
+
 MysqlTestClient = Sequel.connect("mysql2://#{ENV['MOJACO_MYSQL_USER']}:#{ENV['MOJACO_MYSQL_PASSWORD']}@localhost/dataflow_test")
 PostgresqlTestClient = Sequel.connect("postgresql://#{ENV['MOJACO_POSTGRESQL_USER']}:#{ENV['MOJACO_POSTGRESQL_PASSWORD']}@localhost/dataflow_test")
 

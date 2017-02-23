@@ -21,7 +21,7 @@ module Dataflow
       equal_split_per_process = (data_count / Parallel.processor_count.to_f).ceil
       count_per_process = [max_per_process, equal_split_per_process].min
 
-      queries = ordered_system_id_queries(batch_size: count_per_process)
+      queries = ordered_system_id_queries(batch_size: count_per_process)[0...data_count]
 
       self.inferred_schema_at = Time.now
       self.inferred_schema_from = samples_count

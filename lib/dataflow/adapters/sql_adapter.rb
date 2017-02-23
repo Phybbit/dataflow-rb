@@ -167,12 +167,6 @@ module Dataflow
       def recreate_dataset(dataset: nil)
         dataset ||= settings.write_dataset_name.to_sym
         client.drop_table?(dataset)
-
-        unless @schema.present?
-          p 'WARNING: recreate dataset aborted: no schema'
-          return
-        end
-
         create_table(dataset, @schema)
       end
 
@@ -201,7 +195,16 @@ module Dataflow
             client.add_index(dataset, *params)
           rescue Sequel::DatabaseError => e
             # ignore index already exists
-            raise e unless e.wrapped_exception.is_a?(PG::DuplicateTable)
+            next if e.wrapped_exception.is_a?(PG::DuplicateTable)
+
+            # log columns not found but do not raise an error
+            if e.wrapped_exception.is_a?(PG::UndefinedColumn)
+              logger.log("[Error] add_index on #{dataset} failed. #{e}")
+              next
+            end
+
+            # re-raise for everything else
+            raise e
           end
         end
       end
@@ -236,6 +239,8 @@ module Dataflow
                          end
             when 'time'
               col_type = 'timestamp'
+            when 'datetime'
+              col_type = 'timestamp with time zone'
             when 'integer'
               max_size ||= MAX_INT + 1
               col_type = if max_size <= MAX_INT
@@ -246,10 +251,13 @@ module Dataflow
             when 'numeric'
               col_type = 'real'
             when 'array', 'hash'
-              p "Check type of field #{column} (given: #{type}). Not expecting to use JSON."
+              puts "Check type of field #{column} (given: #{type}). Not expecting to use JSON."
               col_type = 'json'
+            when 'date', 'time'
+              # keep as-is
+              col_type = type
             else
-              p "Error: unexpected type '#{type}'. Keeping as-is."
+              puts "[Error] unexpected type '#{type}'. Keeping as-is."
               col_type = type
             end
 
@@ -316,6 +324,10 @@ module Dataflow
           index['unique'] = true if idx[:unique]
           index
         end.compact
+      end
+
+      def logger
+        @logger ||= Dataflow::Logger.new(prefix: "Dataflow[#{settings.dataset_name}]")
       end
     end
   end

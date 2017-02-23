@@ -11,6 +11,10 @@ module Dataflow
       # other_keys_1 and 2 must match in length
       field :other_keys1,  type: Array, default: []
       field :other_keys2,  type: Array, default: []
+      # Which keys to select on each dataset
+      field :select_keys1, type: Array, default: []
+      field :select_keys2, type: Array, default: []
+      # How to prefix each key
       field :prefix1,       type: String, default: ''
       field :prefix2,       type: String, default: ''
 
@@ -30,8 +34,13 @@ module Dataflow
         return {} unless dependencies.count == 2
 
         # merge both dependencies schemas
-        sch = dependencies.first.schema || {}
-        sch.merge(dependencies.second.schema || {})
+        sch1 = dependencies.first.schema || {}
+        sch1 = sch1.select { |k,v| select_keys1.include?(k) } if select_keys1.present?
+        sch2 = dependencies.second.schema || {}
+        sch2 = sch2.select { |k,v| select_keys2.include?(k) } if select_keys2.present?
+        sch = sch1.merge(sch2)
+
+        sch
       end
 
       def compute_impl
@@ -53,17 +62,27 @@ module Dataflow
       private
 
       def sql_join_query
-        fields = required_schema.keys
-        select_keys = dependencies[0].schema.keys.map { |x| "d1.#{x}" } + (dependencies[1].schema.keys - dependencies[0].schema.keys).map { |x| "d2.#{x}" }
-        query = "INSERT INTO #{write_dataset_name} (#{fields.join(',')})
+        d0_keys = dataset_keys(idx: 0)
+        # only select the remaining keys as we don't support yet prefixing fields
+        d1_keys = dataset_keys(idx: 1) - d0_keys
+        insert_keys = d0_keys + d1_keys
+        select_keys = d0_keys.map { |x| "d0.#{x}" } + d1_keys.map { |x| "d1.#{x}" }
+        query = "INSERT INTO #{write_dataset_name} (#{insert_keys.join(',')})
                  SELECT #{select_keys.join(', ')}
-                 FROM #{dependencies[0].read_dataset_name} as d1
-                 INNER JOIN #{dependencies[1].read_dataset_name} as d2
-                 ON d1.#{key1} = d2.#{key2}"
+                 FROM #{dependencies[0].read_dataset_name} as d0
+                 #{join_type.upcase} JOIN #{dependencies[1].read_dataset_name} as d1
+                 ON d0.#{key1} = d1.#{key2}"
+      end
+
+      def dataset_keys(idx:)
+        keys = send("select_keys#{idx + 1}")
+        keys = dependencies[idx].schema.keys if keys.blank?
+        keys
       end
 
       def execute_sql_join
         query = sql_join_query
+        logger.log(query)
         # TODO: work on a better way to interface this
         sql_adapter = data_node.send(:db_adapter)
         sql_adapter.client[query].to_a

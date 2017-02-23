@@ -11,6 +11,15 @@ module Dataflow
     # @return [Hash] with one entry per 'column'/'field'. The values
     #         contains information about the type and usage.
     def infer_schema(samples_count: 0, extended: false)
+      if db_backend == :postgresql
+        # Experimental
+        sch = db_adapter.client.schema(name).to_h
+        sch = sch.reject{ |k, v| k == :_id }.map { |k,v| [k, {type: v[:type].to_s}] }.to_h
+        self.inferred_schema = sch
+        save
+        return sch
+      end
+
       data_count = samples_count == 0 ? count : samples_count # invoked in the base class
       return {} if data_count == 0
 

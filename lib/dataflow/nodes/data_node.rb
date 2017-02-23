@@ -76,6 +76,9 @@ module Dataflow
         # Use the schema as the inferred schema if none is provided.
         # This useful when there is no need to infer schemas (e.g. in SQL)
         self.inferred_schema ||= schema
+
+        # This is needed for the flow to compute properly
+        self.updated_at = Time.now
       end
 
       # Callback: after creation make sure the underlying dataset matches this node's properties.
@@ -94,6 +97,10 @@ module Dataflow
       # When the dataset properties changed notify the adapter to handle the new settings.
       def handle_dataset_settings_changed
         db_adapter.update_settings(data_node: self)
+
+        # if we're using double buffering, just wait for the next buffer
+        # to be created to apply the changes.
+        return if use_double_buffering
 
         # recreate the dataset if there is no data
         if db_adapter.count.zero?

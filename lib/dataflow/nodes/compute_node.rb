@@ -221,6 +221,12 @@ module Dataflow
           on_computing_started
           start_time = Time.now
 
+          if data_node.present? && clear_data_on_compute != data_node.use_double_buffering
+            # make sure the data node has a compatible settings
+            data_node.use_double_buffering = clear_data_on_compute
+            data_node.save
+          end
+
           # update this node's schema with the necessary fields
           data_node&.update_schema(required_schema)
 

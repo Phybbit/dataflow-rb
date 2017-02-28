@@ -197,6 +197,18 @@ RSpec.describe Dataflow::Nodes::ComputeNode, type: :model do
       expect(compute_node.computing_started_at).to eq nil
     end
 
+    it 'sets an heartbeat upon starting computing' do
+      Timecop.freeze('2016-01-01T15:00:00Z') do
+        allow(compute_node).to receive(:compute_impl) do
+          compute_node.reload
+          expect(compute_node.last_heartbeat_time).to eq '2016-01-01T15:00:00Z'.to_time
+        end
+
+        compute_node.compute
+        expect(compute_node).to have_received(:compute_impl)
+      end
+    end
+
     context 'index creation' do
       let(:indexes) { [{ 'key' => ['id'], 'unique' => true }, { 'key' => ['other'] }] }
 

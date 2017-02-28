@@ -31,7 +31,7 @@ module Dataflow
           @data_node_opts || {}
         end
 
-        # DSL to be used while making computed nodes. It supports enforcing validations
+        # DSL to be used while making computeqd nodes. It supports enforcing validations
         # by checking whether there is exactly, at_least (min) or at_most (max)
         # a given number of dependencies. Usage:
         # class MyComputeNode < ComputeNode
@@ -82,6 +82,10 @@ module Dataflow
 
       # Indicates the last time a successful computation has started.
       field :last_compute_starting_time,  type: Time,     editable: false
+
+      # The last time an heartbeat was received.
+      # Useful to detect stale computation that need to be reaped.
+      field :last_heartbeat_time,         type: Time,     editable: false
 
       # Necessary fields:
       validates_presence_of :name
@@ -228,6 +232,7 @@ module Dataflow
             data_node&.create_unique_indexes(dataset_type: :write)
           end
 
+          send_heartbeat
           compute_impl
 
           if clear_data_on_compute
@@ -311,6 +316,7 @@ module Dataflow
         queries = node.ordered_system_id_queries(batch_size: count_per_process)
 
         parallel_each(queries.each_with_index) do |query, idx|
+          send_heartbeat
           progress = (idx / queries.count.to_f * 100).ceil
           on_computing_progressed(pct_complete: progress)
 
@@ -377,6 +383,12 @@ module Dataflow
       # Override to define a required schema.
       def required_schema
         schema
+      end
+
+      def send_heartbeat
+        update_query = { '$set' => { last_heartbeat_time: Time.now } }
+        Dataflow::Nodes::ComputeNode.where(_id: _id)
+                                    .find_one_and_update(update_query)
       end
 
       ##############################

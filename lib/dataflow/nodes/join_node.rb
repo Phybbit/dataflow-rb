@@ -72,6 +72,14 @@ module Dataflow
                  FROM #{dependencies[0].read_dataset_name} as d0
                  #{join_type.upcase} JOIN #{dependencies[1].read_dataset_name} as d1
                  ON d0.#{key1} = d1.#{key2}"
+
+        if has_multiple_keys?
+          join_keys = other_keys1.each_with_index.map { |k, idx| "d0.#{k} = d1.#{other_keys2[idx]}" }
+          query = "#{query}
+                   AND #{join_keys.join("\nAND ")}"
+        end
+
+        query
       end
 
       def dataset_keys(idx:)
@@ -124,6 +132,9 @@ module Dataflow
         end
 
         # for each datum in dataset1, find the corresponding datum in dataset2
+        select_keys_set1 = select_keys1.to_set
+        select_keys_set2 = select_keys2.to_set
+
         n1_records.map do |d1|
           join_value = d1.dig(*tokens_key1)
           next if join_value.nil?
@@ -140,6 +151,10 @@ module Dataflow
 
           # there might be the case that nothing was found after-all
           d2 ||= {}
+
+          # only keep the needed keys
+          d1 = d1.select { |k| select_keys_set1.include?(k) } if select_keys_set1.present?
+          d2 = d2.select { |k| select_keys_set2.include?(k) } if select_keys_set2.present?
 
           # prefix if needed
           d1 = Hash[d1.map { |k, v| ["#{prefix1}#{k}", v] }] if prefix1.present?

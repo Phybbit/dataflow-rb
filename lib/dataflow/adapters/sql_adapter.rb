@@ -72,15 +72,11 @@ module Dataflow
       def initialize(args)
         update_settings(args)
         @client = SqlAdapter.client(settings)
-        @schema = settings.schema || [] # TODO: detect if the table schema has a mis-match
       end
 
       def update_settings(args)
         @settings = Dataflow::Adapters::Settings.new(args)
-      end
-
-      def set_schema(schema)
-        @schema = schema
+        @schema = @settings.schema
       end
 
       # retrieve a single element from a data node

@@ -41,6 +41,15 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
       expect_dataset_are_equal(data, expected_dataset_with_prefix, key: 'd1_id')
     end
 
+    it 'supports selecting keys' do
+      join_node.select_keys1 = %w(id)
+      join_node.select_keys2 = %w(value)
+      join_node.recompute
+      data = join_node.all
+
+      expect_dataset_are_equal(data, expected_dataset_selected_keys, key: 'id')
+    end
+
     it 'supports complex keys' do
       complex_key_join_node.recompute
       data = complex_key_join_node.all
@@ -92,7 +101,7 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
     )
   end
 
-  let (:dataset1) do
+  let(:dataset1) do
     [{
       'id' => 1,
       'd2_id' => 10,
@@ -112,7 +121,7 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
      }]
   end
 
-  let (:dataset2) do
+  let(:dataset2) do
     [{
       'id2' => 10,
       'value' => '10_value_from_d2'
@@ -127,7 +136,7 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
      }]
   end
 
-  let (:expected_dataset_no_prefix) do
+  let(:expected_dataset_no_prefix) do
     [{
       'id' => 1,
       'd2_id' => 10,
@@ -144,7 +153,18 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
      }]
   end
 
-  let (:expected_dataset_left_join) do
+  let(:expected_dataset_selected_keys) do
+    [{
+      'id' => 1,
+      'value' => '10_value_from_d2'
+    },
+     {
+       'id' => 2,
+       'value' => '12_value_from_d2'
+     }]
+  end
+
+  let(:expected_dataset_left_join) do
     [{
       'id' => 1,
       'd2_id' => 10,
@@ -166,7 +186,7 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
      }]
   end
 
-  let (:expected_dataset_with_prefix) do
+  let(:expected_dataset_with_prefix) do
     [{
       'd1_id' => 1,
       'd1_d2_id' => 10,
@@ -185,7 +205,7 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
      }]
   end
 
-  let (:multiple_key_join_node) do
+  let(:multiple_key_join_node) do
     Dataflow::Nodes::JoinNode.create(
       name: 'join_node',
       dependency_ids: [node1, node2],
@@ -197,7 +217,7 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
     )
   end
 
-  let (:dataset_multiple_keys1) do
+  let(:dataset_multiple_keys1) do
     [
       {
         'id' => 1,
@@ -218,7 +238,7 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
     ]
   end
 
-  let (:dataset_multiple_keys2) do
+  let(:dataset_multiple_keys2) do
     [
       {
         'id2' => 1,
@@ -246,7 +266,7 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
     ]
   end
 
-  let (:expected_dataset_with_multiple_keys) do
+  let(:expected_dataset_with_multiple_keys) do
     [
       {
         'id' => 1,
@@ -259,7 +279,7 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
     ]
   end
 
-  let (:no_key_node) do
+  let(:no_key_node) do
     Dataflow::Nodes::JoinNode.create(
       name: 'join_node',
       dependency_ids: [node1, node2],
@@ -267,7 +287,7 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
     )
   end
 
-  let (:not_enough_deps_node_node) do
+  let(:not_enough_deps_node_node) do
     Dataflow::Nodes::JoinNode.create(
       name: 'join_node',
       dependency_ids: [node1],
@@ -277,35 +297,58 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
   end
 
   context 'POSTGRESQL join' do
+    let(:node1) do
+      make_data_node(
+        'pg_data1',
+        db_backend: :postgresql,
+        schema: {
+          id1: { type: 'integer' },
+          first_name: { type: 'string' }
+        }
+      )
+    end
+
+    let(:node2) do
+      make_data_node(
+        'pg_data2',
+        db_backend: :postgresql,
+        schema: {
+          id2: { type: 'integer' },
+          last_name: { type: 'string' }
+        }
+      )
+    end
+
     before do
       node1.add(records: pg_dataset1)
       node2.add(records: pg_dataset2)
     end
 
     it 'joins the datasets' do
+      result = [
+        {
+          id1: 1, id2: 1,
+          first_name: 'hello', last_name: 'world'
+        }
+      ]
       join_node.compute
-      expect(join_node.all).to eq(pg_result)
+      expect(join_node.all).to eq(result)
     end
 
-    let (:node1) do
-      make_data_node('pg_data1',
-                     db_backend: :postgresql,
-                     schema: {
-                       id1: { type: 'integer' },
-                       first_name: { type: 'string' }
-                     })
+    it 'supports selecting only specific keys' do
+      result = [
+        {
+          id1: 1,
+          first_name: 'hello', last_name: 'world'
+        }
+      ]
+      join_node.select_keys1 = %w(id1 first_name)
+      join_node.select_keys2 = %w(last_name)
+      join_node.compute
+      expect(join_node.all).to eq(result)
     end
 
-    let (:node2) do
-      make_data_node('pg_data2',
-                     db_backend: :postgresql,
-                     schema: {
-                       id2: { type: 'integer' },
-                       last_name: { type: 'string' }
-                     })
-    end
-
-    let (:join_node) do
+    let(:join_node) do
       Dataflow::Nodes::JoinNode.create(
         name: 'join_node',
         dependency_ids: [node1, node2],
@@ -315,7 +358,7 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
       )
     end
 
-    let (:pg_dataset1) do
+    let(:pg_dataset1) do
       [
         {
           id1: 1,
@@ -328,7 +371,7 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
       ]
     end
 
-    let (:pg_dataset2) do
+    let(:pg_dataset2) do
       [
         {
           id2: 1,
@@ -340,16 +383,91 @@ RSpec.describe(Dataflow::Nodes::JoinNode, type: :model) do
         }
       ]
     end
+  end
 
-    let (:pg_result) do
+
+  context 'mutliple keys' do
+    let(:node1) do
+      make_data_node(
+        'pg_data1',
+        db_backend: :postgresql,
+        schema: {
+          id1: { type: 'integer' },
+          second_id: { type: 'integer' },
+          first_name: { type: 'string' }
+        }
+      )
+    end
+
+    let(:node2) do
+      make_data_node(
+        'pg_data2',
+        db_backend: :postgresql,
+        schema: {
+          id2: { type: 'integer' },
+          second_id2: { type: 'integer' },
+          last_name: { type: 'string' }
+        }
+      )
+    end
+
+    before do
+      node1.add(records: pg_dataset_multi_key1)
+      node2.add(records: pg_dataset_multi_key2)
+    end
+
+    it 'joins on multiple keys the datasets' do
+      result = [
+        {
+          id1: 2, second_id: 3, id2: 2, second_id2: 3,
+          first_name: 'hello', last_name: 'world'
+        }
+      ]
+      join_node.other_keys1 = %w(second_id)
+      join_node.other_keys2 = %w(second_id2)
+      join_node.compute
+      expect(join_node.all).to eq(result)
+    end
+
+    let(:join_node) do
+      Dataflow::Nodes::JoinNode.create(
+        name: 'join_node',
+        dependency_ids: [node1, node2],
+        key1: 'id1',
+        key2: 'id2',
+        data_node_id: make_data_node('pg_result', db_backend: :postgresql)
+      )
+    end
+
+    let(:pg_dataset_multi_key1) do
       [
         {
           id1: 1,
-          id2: 1,
-          first_name: 'hello',
+          second_id: 1,
+          first_name: 'ignored'
+        },
+        {
+          id1: 2,
+          second_id: 3,
+          first_name: 'hello'
+        }
+      ]
+    end
+
+    let(:pg_dataset_multi_key2) do
+      [
+        {
+          id2: 2,
+          second_id2: 2,
+          last_name: 'ignored'
+        },
+        {
+          id2: 2,
+          second_id2: 3,
           last_name: 'world'
         }
       ]
     end
   end
+
 end

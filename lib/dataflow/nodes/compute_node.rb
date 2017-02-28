@@ -11,7 +11,7 @@ module Dataflow
       include Dataflow::SchemaMixin
 
       event :computing_started    # handler(node)
-      event :computing_progressed # handler(node, pct_complete)
+      event :computing_progressed # handler(node, pct_complete:)
       event :computing_finished   # handler(node, state)
 
       delegate :find, :all, :all_paginated, :count, :ordered_system_id_queries,

@@ -25,7 +25,7 @@ module Dataflow
 
       # find out how many batches are needed
       max_per_process = 1000
-      max_per_process = limit_per_process if respond_to? :limit_per_process
+      max_per_process = limit_per_process if respond_to?(:limit_per_process) && limit_per_process > 0
 
       equal_split_per_process = (data_count / Parallel.processor_count.to_f).ceil
       count_per_process = [max_per_process, equal_split_per_process].min

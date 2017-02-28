@@ -264,10 +264,14 @@ module Dataflow
         add(records: records)
       end
 
-      def export(connection_opts: { db_backend: :csv }, keys: nil, where: {})
+      def export(connection_opts: { db_backend: :csv }, keys: [], where: {})
         on_export_started(connection_opts: connection_opts, keys: keys)
         # instanciate and export without saving anything
-        Export::ToCsvNode.new(dependency_ids: [self], query: where.to_json).compute_impl
+        Export::ToCsvNode.new(
+          dependency_ids: [self],
+          query: where.to_json,
+          keys: keys
+        ).compute_impl
         on_export_finished
       end
 

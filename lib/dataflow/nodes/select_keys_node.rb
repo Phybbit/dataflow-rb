@@ -8,8 +8,8 @@ module Dataflow
       ensure_data_node_exists
       ensure_dependencies exactly: 1
 
-      def export(connection_opts: { db_backend: :csv }, keys: nil)
-        super(connection_opts: connection_opts, keys: keys || self.keys)
+      def export
+        data_node.export(keys: keys)
       end
 
       private

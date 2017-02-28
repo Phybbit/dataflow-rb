@@ -9,17 +9,19 @@ module Dataflow
         # A JSON encoded query to pass along.
         field :query, type: String, default: {}.to_json
 
+        # Which fields to export
+        field :keys, type: Array, default: []
+
         def compute_impl
           node = dependencies.first
           where = JSON.parse(query)
 
           # fetch the schema
-          sch = node.infer_partial_schema(where: where, extended: true)
-
-          # re-order the schema if needed
-          if node.respond_to? :keys
-            sch = node.keys.map { |k| [k, sch[k]] }.to_h if keys.present?
-          end
+          sch = if keys.present?
+                  keys.map { |k| [k, { type: 'string' }] }.to_h
+                else
+                  node.infer_partial_schema(where: where, extended: true)
+                end
 
           # create the dataset
           csv_adapter = Adapters::CsvAdapter.new(data_node: node)
@@ -40,8 +42,7 @@ module Dataflow
             # TODO: re-enabled event on_export_progressed
             # progress = (idx / queries.count.to_f * 100).ceil
             # on_export_progressed(pct_complete: progress)
-
-            batch = node.all(where: query.merge(where))
+            batch = node.all(where: query.merge(where), fields: sch.keys)
             csv_adapter.save(records: batch)
           end
 

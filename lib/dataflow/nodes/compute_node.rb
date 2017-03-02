@@ -311,6 +311,7 @@ module Dataflow
       end
 
       def process_parallel(node:)
+        return if node.blank?
         record_count = node.count
         return if record_count == 0
 

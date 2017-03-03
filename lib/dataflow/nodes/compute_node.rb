@@ -226,11 +226,12 @@ module Dataflow
             data_node.use_double_buffering = clear_data_on_compute
             data_node.save
           end
+          
+          pre_compute(force_compute: force_compute)
 
           # update this node's schema with the necessary fields
           data_node&.update_schema(required_schema)
 
-          pre_compute(force_compute: force_compute)
 
           if clear_data_on_compute
             # Pre-compute, we recreate the table, the unique indexes

@@ -15,16 +15,15 @@ module Dataflow
       private
 
       def compute_batch(records:)
-        k = keys
-        k = k.map(&:to_sym) if dependencies.first.use_symbols?
-        select_keys(records: records, keys: k)
+        keys_tokens = keys.map { |k| [k, record_dig_tokens(key: k, use_sym: dependencies.first.use_symbols?)] }
+        select_keys(records: records, keys_tokens: keys_tokens)
       end
 
-      def select_keys(records:, keys:)
+      def select_keys(records:, keys_tokens:)
         records.map do |base_record|
           new_record = {}
-          keys.each do |key|
-            value = record_value(record: base_record, key: key)
+          keys_tokens.each do |key, tokens|
+            value = base_record.dig(*tokens)
             next unless value.present?
 
             add_value_to_record(record: new_record, key: key, value: value)

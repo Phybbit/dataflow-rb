@@ -320,6 +320,8 @@ module Dataflow
           index['unique'] = true if idx[:unique]
           index
         end.compact
+      rescue Sequel::DatabaseError
+        []
       end
 
       def logger

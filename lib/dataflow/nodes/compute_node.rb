@@ -16,7 +16,7 @@ module Dataflow
 
       delegate :find, :all, :all_paginated, :count, :ordered_system_id_queries,
                :db_backend, :db_name, :use_symbols?,
-               :schema, :read_dataset_name, :write_dataset_name,
+               :read_dataset_name, :write_dataset_name,
                to: :data_node
 
       #############################################
@@ -390,7 +390,12 @@ module Dataflow
 
       # Override to define a required schema.
       def required_schema
-        schema
+        data_node&.schema
+      end
+
+      # Keep a compatible interface with the data node
+      def schema
+        required_schema
       end
 
       def send_heartbeat

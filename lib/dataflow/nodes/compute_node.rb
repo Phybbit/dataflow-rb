@@ -300,6 +300,11 @@ module Dataflow
         release_computing_lock!
       end
 
+      # Keep a compatible interface with the data node
+      def schema
+        required_schema
+      end
+
       private
 
       # Compute implementation:
@@ -391,11 +396,6 @@ module Dataflow
       # Override to define a required schema.
       def required_schema
         data_node&.schema
-      end
-
-      # Keep a compatible interface with the data node
-      def schema
-        required_schema
       end
 
       def send_heartbeat

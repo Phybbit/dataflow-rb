@@ -35,9 +35,9 @@ module Dataflow
 
         # merge both dependencies schemas
         sch1 = dependencies.first.schema || {}
-        sch1 = sch1.select { |k,v| select_keys1.include?(k) } if select_keys1.present?
+        sch1 = sch1.select { |k,v| select_keys1.include?(k.to_s) } if select_keys1.present?
         sch2 = dependencies.second.schema || {}
-        sch2 = sch2.select { |k,v| select_keys2.include?(k) } if select_keys2.present?
+        sch2 = sch2.select { |k,v| select_keys2.include?(k.to_s) } if select_keys2.present?
         sch = sch1.merge(sch2)
 
         sch

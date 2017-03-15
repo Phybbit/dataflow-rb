@@ -1,6 +1,6 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 
-ENV['RACK_ENV'] = 'test'
+ENV['MONGOID_ENV'] = 'test'
 require 'dotenv'
 Dotenv.load('.env.test')
 

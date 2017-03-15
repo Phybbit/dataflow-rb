@@ -47,7 +47,7 @@ require 'dataflow/nodes/filter/where_node'
 require 'dataflow/nodes/transformation/to_time_node'
 
 unless defined?(Rails) || Mongoid.configured?
-  env = defined?(RSpec) ? 'test' : 'default'
+  env = ENV['MONGOID_ENV'] || 'default'
   # setup mongoid for stand-alone usage
   config_file_path = File.join(File.dirname(__FILE__), 'config', 'mongoid.yml')
   Mongoid.load!(config_file_path, env)

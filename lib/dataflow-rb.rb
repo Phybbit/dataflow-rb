@@ -70,3 +70,26 @@ module Dataflow
     Dataflow::Nodes::ComputeNode.find_by(name: id)
   end
 end
+
+
+###############################################################################
+# Override the #constantize in active_support/inflector/methods.rb
+# to rescue from Dataflow::Nodes::... name errors.
+# In such cases, we return a generic Dataflow::Nodes::DataNode instead.
+# This is used within mongoid to instance the correct node types.
+module Dataflow
+  module ConstantizePatch
+    def constantize(*args)
+      super
+    rescue NameError => e
+      raise e unless e.message =~ /Dataflow::Nodes/
+      p "Warning -- Node class not found. #{e}"
+      Dataflow::Nodes::ComputeNode
+    end
+  end
+end
+
+ActiveSupport::Inflector.module_eval do
+  extend Dataflow::ConstantizePatch
+end
+###############################################################################

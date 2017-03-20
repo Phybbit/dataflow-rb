@@ -179,6 +179,7 @@ module Dataflow
       # @param force_recompute [Boolean] if true, computes
       #        even if the node is already up to date.
       def recompute(depth: 0, force_recompute: false)
+        send_heartbeat
         logger.log "#{'>' * (depth + 1)} #{name} started recomputing..."
         start_time = Time.now
 
@@ -187,6 +188,7 @@ module Dataflow
           if !dependency.updated? || force_recompute
             dependency.recompute(depth: depth + 1, force_recompute: force_recompute)
           end
+          send_heartbeat
         end
 
         # Dependencies data may have changed in a child process.
@@ -226,7 +228,8 @@ module Dataflow
             data_node.use_double_buffering = clear_data_on_compute
             data_node.save
           end
-          
+
+          send_heartbeat
           pre_compute(force_compute: force_compute)
 
           # update this node's schema with the necessary fields

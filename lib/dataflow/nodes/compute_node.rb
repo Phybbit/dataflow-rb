@@ -264,7 +264,7 @@ module Dataflow
 
       rescue StandardError => e
         on_computing_finished(state: 'error', error: e) if has_compute_lock
-        logger.log "#{'>' * (depth + 1)} [ERROR] #{name} failed computing: #{e}"
+        logger.error(error: e, custom_message: "#{name} failed computing.")
         raise
       ensure
         release_computing_lock! if has_compute_lock

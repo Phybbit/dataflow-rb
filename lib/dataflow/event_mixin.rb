@@ -66,7 +66,7 @@ module Dataflow
             begin
               handler.call(self, *args)
             rescue StandardError => e
-              @logger&.log("ERROR IN HANDLER [on_#{event_name}]: #{e}")
+              @logger&.error(error: e, custom_message: "ERROR IN HANDLER [on_#{event_name}]")
               # ignore error in handlers
             end
           end

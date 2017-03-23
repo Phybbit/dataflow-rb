@@ -195,7 +195,7 @@ module Dataflow
 
             # log columns not found but do not raise an error
             if e.wrapped_exception.is_a?(PG::UndefinedColumn)
-              logger.log("[Error] add_index on #{dataset} failed. #{e}")
+              logger.error(custom_message: "add_index on #{dataset} failed.", error: e)
               next
             end
 

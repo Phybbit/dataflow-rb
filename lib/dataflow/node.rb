@@ -33,5 +33,11 @@ module Dataflow
       raise Dataflow::Errors::InvalidConfigurationError, errors.messages unless valid
       true
     end
+
+    def required_by
+      Dataflow::Nodes::ComputeNode.where(dependency_ids: _id).map { |node|
+        { node: node, type: 'dependency' }
+      }
+    end
   end
 end

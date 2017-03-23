@@ -294,6 +294,22 @@ RSpec.describe Dataflow::Nodes::ComputeNode, type: :model do
     end
   end
 
+  describe '#required_by' do
+    before do
+      # make sure these nodes are created
+      compute_node
+      newer_dependency
+    end
+
+    it 'finds which nodes are currently using the given node as a dependency' do
+      expect(newer_dependency.required_by).to eq([node: compute_node, type: 'dependency'])
+    end
+
+    it 'finds which nodes are currently using the given node as a dataset' do
+      expect(newer_dependency.data_node.required_by).to eq([node: newer_dependency, type: 'dataset'])
+    end
+  end
+
   describe '.properties' do
     it 'includes parent properties' do
       expect(NOOPComputeNode.properties[:name]).not_to be nil

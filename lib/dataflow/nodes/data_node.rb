@@ -297,6 +297,13 @@ module Dataflow
         (db_backend.to_s =~ /sql/).present?
       end
 
+
+      def required_by
+        super + Dataflow::Nodes::ComputeNode.where(data_node_id: _id).map { |node|
+          { node: node, type: 'dataset' }
+        }
+      end
+
       private
 
       def db_adapter(connection_opts = {})

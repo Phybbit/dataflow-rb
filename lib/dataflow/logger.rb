@@ -21,7 +21,7 @@ module Dataflow
     def error(error:, custom_message: '')
       first_line = "[ERROR => #{error.class}: '#{error.message}']"
       first_line += " #{custom_message}" if custom_message.present?
-      first_line += " Backtrace: "
+      first_line += ' Backtrace: '
       log(first_line)
       log('--')
       (error.backtrace || []).each_with_index { |line, idx| log("#{idx}: #{line}") }

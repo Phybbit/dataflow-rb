@@ -28,7 +28,7 @@ module Dataflow
     end
 
     def trace_id
-      Thread.current.object_id
+      (Process.pid + Thread.current.object_id).to_s(16)[-8..-1]
     end
 
     class LoggerImpl

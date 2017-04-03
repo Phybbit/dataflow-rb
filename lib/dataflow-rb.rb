@@ -69,8 +69,14 @@ module Dataflow
   rescue Mongoid::Errors::DocumentNotFound
     Dataflow::Nodes::ComputeNode.find_by(name: id)
   end
-end
 
+  # helper that helps clearing un-used datasets
+  # NOTE: although there is a best attempt to not delete datasets that are
+  # currently being written to, this is not safe to use while executing in parallel.
+  def self.clear_tmp_datasets
+    Dataflow::Nodes::DataNode.all.each(&:safely_clear_write_dataset)
+  end
+end
 
 ###############################################################################
 # Override the #constantize in active_support/inflector/methods.rb

@@ -304,6 +304,19 @@ module Dataflow
         }
       end
 
+      # this is not safe if there is some parallel processing going on
+      def safely_clear_write_dataset
+        # we can only clear the write dataset if we're using double buffering
+        return unless use_double_buffering
+        # check if there is any node that is currently computing to this dataset
+        used_by = required_by.select { |x| x[:type] == 'dataset' && x[:node].locked_for_computing? }
+        return if used_by.present?
+
+        logger.log("Dropping #{db_name}.#{write_dataset_name} on #{db_backend}.")
+        # TODO: lock the node?
+        db_adapter.drop_dataset(write_dataset_name)
+      end
+
       private
 
       def db_adapter(connection_opts = {})
@@ -343,6 +356,10 @@ module Dataflow
         else
           [name]
         end
+      end
+
+      def logger
+        @logger ||= Dataflow::Logger.new(prefix: 'Dataflow')
       end
     end # class DataNode
   end # module Nodes

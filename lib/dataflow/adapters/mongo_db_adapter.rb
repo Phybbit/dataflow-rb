@@ -166,9 +166,14 @@ module Dataflow
       # recreate the table/collection
       def recreate_dataset(dataset: nil)
         dataset ||= write_dataset_name
+        drop_dataset(dataset)
+        collection = client[dataset]
+        collection.create
+      end
+
+      def drop_dataset(dataset)
         collection = client[dataset]
         collection.drop
-        collection.create
       end
 
       # Create the indexes on this dataset.

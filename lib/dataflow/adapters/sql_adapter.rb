@@ -162,8 +162,13 @@ module Dataflow
       # recreate the table/collection
       def recreate_dataset(dataset: nil)
         dataset ||= settings.write_dataset_name.to_sym
-        client.drop_table?(dataset)
+        drop_dataset(dataset)
         create_table(dataset, @schema)
+      end
+
+      # drops the given dataset
+      def drop_dataset(dataset)
+        client.drop_table?(dataset)
       end
 
       # Create the indexes on this dataset.

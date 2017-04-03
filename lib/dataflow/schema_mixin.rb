@@ -13,7 +13,7 @@ module Dataflow
     def infer_schema(samples_count: 0, extended: false)
       if db_backend == :postgresql
         # Experimental
-        sch = db_adapter.client.schema(name).to_h
+        sch = db_adapter.client.schema(read_dataset_name).to_h
         sch = sch.reject{ |k, v| k == :_id }.map { |k,v| [k, {type: v[:type].to_s}] }.to_h
         self.inferred_schema = sch
         save

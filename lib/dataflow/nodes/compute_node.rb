@@ -70,6 +70,9 @@ module Dataflow
       # per process during computation.
       field :limit_per_process,           type: Integer, default: 0
 
+      # Maximum number of processes to use in parallel. Use 1 per core when 0.
+      field :max_parallel_processes,      type: Integer, default: 0
+
       # Use automatic recomputing interval. In seconds.
       field :recompute_interval,          type: Integer, default: 0
 
@@ -235,7 +238,6 @@ module Dataflow
           # update this node's schema with the necessary fields
           data_node&.update_schema(required_schema)
 
-
           if clear_data_on_compute
             # Pre-compute, we recreate the table, the unique indexes
             data_node&.recreate_dataset(dataset_type: :write)
@@ -253,6 +255,7 @@ module Dataflow
           end
 
           self.last_compute_starting_time = start_time
+          save
           duration = Time.now - start_time
           logger.log "#{'>' * (depth + 1)} #{name} took #{duration} seconds to compute."
           on_computing_finished(state: 'computed')
@@ -506,7 +509,13 @@ module Dataflow
             yield(*args)
           end
         else
-          Parallel.each(itr) do |*args|
+          opts = if max_parallel_processes > 0
+                   { in_processes: max_parallel_processes }
+                 else
+                   {}
+                 end
+
+          Parallel.each(itr, opts) do |*args|
             yield(*args)
             Dataflow::Adapters::SqlAdapter.disconnect_clients
             Dataflow::Adapters::MongoDbAdapter.disconnect_clients

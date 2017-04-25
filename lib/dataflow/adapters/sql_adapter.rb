@@ -165,7 +165,7 @@ module Dataflow
             .import(columns, tabular_data)
         else
           # ignore insert conflicts
-          dataset.insert_conflict.import(columns, tabular_data)
+          dataset.insert_ignore.import(columns, tabular_data)
         end
       end
 

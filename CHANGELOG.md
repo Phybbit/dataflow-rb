@@ -1,5 +1,27 @@
 # Changelog
 
+#### 0.11.0
+- [7c09e8a] Add data_node#drop_dataset! to completely drop the data
+- [ba0532f] Added upsert on psql adapter
+- [4d44bbd] Support setting the number of parallel processes
+- [8b48a6b] Add support for double buffered schema inferrence on postgresql
+- [49bfe1a] Add support for clearing unused datasets
+- [aabd5e3] Added #required_by to the node interface
+- [4fd2617] Handle forks having the same thread id
+- [7fc3064] Add error logging and trace id
+- [fbbd58b] Added heartbeats when recomputing the dependencies and before the pre-compute callback
+
+#### 0.10.2
+- [966e771] Do not crash if there is an unknown node type in the metadata.
+
+#### 0.10.1
+- [9ee24a4] Cleanly set the mongoid env Fix the bin/console script
+- [7fdc6f1] Support symbols in schema keys when merging schemas in the join node
+- [6c7ad5c] Fail silently if no table exists when fetching its metadata
+- [6b0886e] Make the ComputeNode#schema public
+- [03f37e2] Optimize the select keys node to avoid recomputing keys at each record.
+- [23ae504] ComputeNode#schema returns the required schema
+
 #### 0.10.0
 - [2f6284c] Allow the pre-compute to modify the necessary schema
 - [cec8a1d] Do not crash if process_parallel is called without dependencies.

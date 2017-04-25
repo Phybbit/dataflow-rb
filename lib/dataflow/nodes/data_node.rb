@@ -317,6 +317,12 @@ module Dataflow
         db_adapter.drop_dataset(write_dataset_name)
       end
 
+      def drop_dataset!
+        db_adapter.drop_dataset(write_dataset_name)
+        return unless use_double_buffering
+        db_adapter.drop_dataset(read_dataset_name)
+      end
+
       private
 
       def db_adapter(connection_opts = {})

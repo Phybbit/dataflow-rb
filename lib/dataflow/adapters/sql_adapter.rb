@@ -110,6 +110,11 @@ module Dataflow
         end
       end
 
+      def all_paginated(where: {}, fields: [], cursor: nil)
+        # for now, retrieve all records at once
+        { 'data' => all(where: where, fields: fields), 'next_cursor' => '' }
+      end
+
       # Create queries that permit processing the whole dataset in parallel without using offsets.
       def ordered_system_id_queries(batch_size:)
         ids = all(fields: [SYSTEM_ID], sort: { SYSTEM_ID => 1 }).map { |x| x[SYSTEM_ID] }
@@ -137,16 +142,31 @@ module Dataflow
       end
 
       # Save the given records
-      # TODO: support :replace_by parameter
-      def save(records:)
-        dataset = client[settings.write_dataset_name.to_sym]
+      # @param replace_by [Array] if the replace_by key is provided,
+      #        it will try to replace records with the matching key,
+      #        or insert if none is found.
+      #        NOTE: the replace_by keys must be UNIQUE indexes.
+      def save(records:, replace_by: nil)
+        dataset_name = settings.write_dataset_name.to_sym
+        dataset = client[dataset_name]
         columns = dataset.columns.reject { |x| x == SYSTEM_ID }
 
         tabular_data = records.map do |record|
           columns.map { |col| record[col] }
         end
 
-        dataset.insert_ignore.import(columns, tabular_data)
+        if replace_by.present?
+          index_keys = Array(replace_by).map { |c| c.to_sym}.uniq
+
+          # update every field on conflict
+          update_clause = columns.map { |k| [k, :"excluded__#{k}"] }.to_h
+          dataset
+            .insert_conflict(target: index_keys, update: update_clause)
+            .import(columns, tabular_data)
+        else
+          # ignore insert conflicts
+          dataset.insert_conflict.import(columns, tabular_data)
+        end
       end
 
       # Delete records that match the options.
@@ -317,8 +337,8 @@ module Dataflow
         params
       end
 
-      def retrieve_collection_indexes(collection)
-        psql_indexes = client.indexes(collection)
+      def retrieve_collection_indexes(dataset_name)
+        psql_indexes = client.indexes(dataset_name)
         psql_indexes.values.map do |idx|
           cols = idx[:columns].map(&:to_s)
           index = { 'key' => cols }

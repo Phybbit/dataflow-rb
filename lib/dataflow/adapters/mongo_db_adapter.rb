@@ -291,7 +291,8 @@ module Dataflow
         index_key = {}
         keys = Array(dataset_index[:key])
         keys.each { |k| index_key[k] = 1 }
-        index = { key: index_key }
+        name = keys.map { |k| k[0..1] }.push(SecureRandom.hex(4)).join('_')
+        index = { key: index_key, name: name }
         index[:unique] = true if dataset_index[:unique]
         index
       end

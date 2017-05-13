@@ -309,14 +309,8 @@ module Dataflow
                 else
                   ["#{k} <> ?", value]
                 end
-              when '<'
-                ["#{k} < ?", value]
-              when '<='
-                ["#{k} <= ?", value]
-              when '>'
-                ["#{k} > ?", value]
-              when '>='
-                ["#{k} >= ?", value]
+              when '<', '<=', '>', '>=', '~', '~*'
+                ["#{k} #{operator} ?", value]
               end
             end
           else

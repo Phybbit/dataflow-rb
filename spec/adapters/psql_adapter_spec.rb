@@ -8,6 +8,7 @@ RSpec.describe Dataflow::Adapters::PsqlAdapter, type: :model do
       Integer :id
       DateTime :updated_at
       Integer :value
+      String :value_s
     end
   end
 
@@ -101,11 +102,11 @@ RSpec.describe Dataflow::Adapters::PsqlAdapter, type: :model do
   }
   let(:dummy_data) {
     [
-      { id: 1, updated_at: '2016-01-01'.to_time, value: 1},
-      { id: 1, updated_at: '2016-01-15'.to_time, value: 2},
-      { id: 1, updated_at: '2016-02-02'.to_time, value: 3},
-      { id: 2, updated_at: '2016-02-02'.to_time, value: 2},
-      { id: 3, updated_at: '2016-02-02'.to_time, value: 3},
+      { id: 1, updated_at: '2016-01-01'.to_time, value: 1, value_s: 'aaa'},
+      { id: 1, updated_at: '2016-01-15'.to_time, value: 2, value_s: 'AAA'},
+      { id: 1, updated_at: '2016-02-02'.to_time, value: 3, value_s: 'bbb'},
+      { id: 2, updated_at: '2016-02-02'.to_time, value: 2, value_s: '011'},
+      { id: 3, updated_at: '2016-02-02'.to_time, value: 3, value_s: '012'},
     ]
   }
   let(:data_node) {

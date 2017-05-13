@@ -262,6 +262,10 @@ module Dataflow
                 sanitized_opts[k]['$gt'] = try_cast_value(k, value)
               when '>='
                 sanitized_opts[k]['$gte'] = try_cast_value(k, value)
+              when '~*' # match regex /regex/i (case insensitive)
+                sanitized_opts[k]['$regex'] = /#{value}/i
+              when '~'  # match regex /regex/  (case sensitive)
+                sanitized_opts[k]['$regex'] = /#{value}/
               end
             end
           else

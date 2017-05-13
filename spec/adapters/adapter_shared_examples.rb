@@ -125,6 +125,22 @@ RSpec.shared_examples 'adapter #all' do |use_sym: false|
         end
       end
 
+      it 'supports ~ (regex case sensitive)' do
+        records = adapter.all(where: {'value_s' => { '~' => 'aaa' }})
+        expect(records.count).to eq 1
+        records.each do |record|
+          expect(record[hash_key('id')]).to eq 1
+        end
+      end
+
+      it 'supports ~* (regex case insensitive)' do
+        records = adapter.all(where: {'value_s' => { '~*' => 'aaa' }})
+        expect(records.count).to eq 2
+        records.each do |record|
+          expect(record[hash_key('id')]).to eq 1
+        end
+      end
+
       it 'supports dates' do
         records = adapter.all(where: {'updated_at' => { '<=' => '2016-01-16'.to_datetime, '>=' => '2016-01-14'.to_datetime }})
         expect(records.count).to eq 1

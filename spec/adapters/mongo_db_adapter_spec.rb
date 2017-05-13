@@ -113,11 +113,11 @@ RSpec.describe Dataflow::Adapters::MongoDbAdapter, type: :model do
   }
   let(:dummy_data) {
     [
-      {'id' => 1, 'updated_at' => '2016-01-01'.to_time, 'value' => 1, '_mojaco_updated_at' => Time.parse('2016-01-01') },
-      {'id' => 1, 'updated_at' => '2016-01-15'.to_time, 'value' => 2, '_mojaco_updated_at' => Time.parse('2016-01-15') },
-      {'id' => 1, 'updated_at' => '2016-02-02'.to_time, 'value' => 3, '_mojaco_updated_at' => Time.parse('2016-02-02') },
-      {'id' => 2, 'updated_at' => '2016-02-02'.to_time, 'value' => 2, '_mojaco_updated_at' => Time.parse('2016-02-02') },
-      {'id' => 3, 'updated_at' => '2016-02-02'.to_time, 'value' => 3, '_mojaco_updated_at' => Time.parse('2016-02-02') },
+      {'id' => 1, 'updated_at' => '2016-01-01'.to_time, 'value' => 1, 'value_s' => 'aaa', '_mojaco_updated_at' => Time.parse('2016-01-01') },
+      {'id' => 1, 'updated_at' => '2016-01-15'.to_time, 'value' => 2, 'value_s' => 'AAA', '_mojaco_updated_at' => Time.parse('2016-01-15') },
+      {'id' => 1, 'updated_at' => '2016-02-02'.to_time, 'value' => 3, 'value_s' => 'bbb', '_mojaco_updated_at' => Time.parse('2016-02-02') },
+      {'id' => 2, 'updated_at' => '2016-02-02'.to_time, 'value' => 2, 'value_s' => '011', '_mojaco_updated_at' => Time.parse('2016-02-02') },
+      {'id' => 3, 'updated_at' => '2016-02-02'.to_time, 'value' => 3, 'value_s' => '012', '_mojaco_updated_at' => Time.parse('2016-02-02') },
     ]
   }
   let(:adapter) {

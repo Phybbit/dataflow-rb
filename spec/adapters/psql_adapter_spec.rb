@@ -2,6 +2,10 @@ require 'spec_helper'
 
 RSpec.describe Dataflow::Adapters::PsqlAdapter, type: :model do
 
+  before do
+    adapter # make sure it's loaded as it will load extensions
+  end
+
   def create_test_dataset
     client.create_table dataset_name do
       primary_key :_id

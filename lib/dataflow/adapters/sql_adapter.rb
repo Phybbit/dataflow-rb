@@ -39,7 +39,9 @@ module Dataflow
           try_create_db(uri, db_name, user, password) unless is_external_db
 
           # then, create the connection object
-          @clients[connection_uri] ||= Sequel.connect("#{connection_uri}?encoding=utf8")
+          db = Sequel.connect("#{connection_uri}?encoding=utf8")
+          add_extensions(settings, db)
+          @clients[connection_uri] = db
         end
 
         # Used internally to try to create the DB automatically.
@@ -54,6 +56,13 @@ module Dataflow
         rescue Sequel::DatabaseError => e
           # ignore error
           false
+        end
+
+        # load Sequel extensions based on the type
+        def add_extensions(settings, db)
+          if settings.adapter_type == 'postgresql'
+            db.extension(:pg_loose_count)
+          end
         end
 
         # Force the clients to disconnect their connections.

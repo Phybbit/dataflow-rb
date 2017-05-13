@@ -44,6 +44,11 @@ RSpec.describe Dataflow::Adapters::PsqlAdapter, type: :model do
       expect(queries[1]).to eq({_id: {'>=' => 3, '<'  => 5}})
       expect(queries[2]).to eq({_id: {'>=' => 5, '<=' => 5}})
     end
+
+    it 'supports the array type' do
+      res = adapter.client["SELECT array_agg(id) as id_list FROM test_table WHERE updated_at = '2016-02-02' GROUP BY updated_at"].to_a
+      expect(res).to eq([{ id_list: [1,2,3] }])
+    end
   end
 
   context 'write' do

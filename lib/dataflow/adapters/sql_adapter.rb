@@ -61,6 +61,8 @@ module Dataflow
         # load Sequel extensions based on the type
         def add_extensions(settings, db)
           if settings.adapter_type == 'postgresql'
+            db.extension(:pg_array)
+            # db.extension(:pg_json)
             db.extension(:pg_loose_count)
           end
         end

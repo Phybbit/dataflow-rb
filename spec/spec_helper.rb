@@ -1,6 +1,7 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 
 ENV['MONGOID_ENV'] = 'test'
+ENV['DATAFLOW_SKIP_LOGGING'] = 'true'
 require 'dotenv'
 Dotenv.load('.env.test')
 

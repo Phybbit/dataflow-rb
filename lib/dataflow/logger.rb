@@ -11,7 +11,7 @@ module Dataflow
     end
 
     def log(str)
-      return if ENV['RACK_ENV'] == 'test'
+      return if ENV['DATAFLOW_SKIP_LOGGING']
       now = DateTime.now.strftime('%y-%m-%d %H:%M:%S')
       message = "[#{now}][#{trace_id}] #{prefix} | #{str}"
       logger_impl = @@impl

@@ -16,6 +16,14 @@ module Dataflow
           storage: 0
         }
       end
+
+      def regex_case_senstive_op
+        '~'
+      end
+
+      def regex_case_insensitive_op
+        '~*'
+      end
     end
   end
 end

@@ -45,7 +45,7 @@ RSpec.shared_examples 'adapter #find' do |use_sym: false|
 end
 
 
-RSpec.shared_examples 'adapter #all' do |use_sym: false|
+RSpec.shared_examples 'adapter #all' do |use_sym: false, adapter_type: ''|
   define_hash_key_method(use_sym)
 
   describe '#all' do
@@ -125,11 +125,14 @@ RSpec.shared_examples 'adapter #all' do |use_sym: false|
         end
       end
 
-      it 'supports ~ (regex case sensitive)' do
-        records = adapter.all(where: {'value_s' => { '~' => 'aaa' }})
-        expect(records.count).to eq 1
-        records.each do |record|
-          expect(record[hash_key('id')]).to eq 1
+
+      if adapter_type != 'mysql'
+        it 'supports ~ (regex case sensitive)' do
+          records = adapter.all(where: {'value_s' => { '~' => 'aaa' }})
+          expect(records.count).to eq 1
+          records.each do |record|
+            expect(record[hash_key('id')]).to eq 1
+          end
         end
       end
 

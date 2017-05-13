@@ -16,6 +16,14 @@ module Dataflow
           storage: 0
         }
       end
+
+      def regex_case_senstive_op
+        raise NotImplementedError, 'Mysql does not support a case sensitive regex matching operator'
+      end
+
+      def regex_case_insensitive_op
+        'REGEXP'
+      end
     end
   end
 end

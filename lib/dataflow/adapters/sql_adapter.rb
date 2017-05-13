@@ -321,8 +321,12 @@ module Dataflow
                 else
                   Sequel.lit("#{k} <> ?", value)
                 end
-              when '<', '<=', '>', '>=', '~', '~*'
+              when '<', '<=', '>', '>='
                 Sequel.lit("#{k} #{operator} ?", value)
+              when '~'
+                Sequel.lit("#{k} #{regex_case_senstive_op} ?", value)
+              when '~*'
+                Sequel.lit("#{k} #{regex_case_insensitive_op} ?", value)
               end
             end
           else

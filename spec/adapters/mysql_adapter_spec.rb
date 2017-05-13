@@ -28,7 +28,7 @@ RSpec.describe Dataflow::Adapters::MysqlAdapter, type: :model do
     end
 
     include_examples 'adapter #find',  use_sym: true
-    include_examples 'adapter #all',   use_sym: true
+    include_examples 'adapter #all',   use_sym: true, adapter_type: 'mysql'
     include_examples 'adapter #count', use_sym: true
   end
 

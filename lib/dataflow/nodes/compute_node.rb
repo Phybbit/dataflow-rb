@@ -504,7 +504,7 @@ module Dataflow
 
         # set to true to debug code in the iteration
         is_debugging_impl = (ENV['RACK_ENV'] == 'test' && ENV['DEBUG'])
-        if is_debugging_impl # || true
+        if is_debugging_impl || true
           itr.each do |*args|
             yield(*args)
           end

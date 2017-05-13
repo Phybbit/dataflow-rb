@@ -158,8 +158,9 @@ module Dataflow
         if replace_by.present?
           index_keys = Array(replace_by).map { |c| c.to_sym}.uniq
 
-          # update every field on conflict
-          update_clause = columns.map { |k| [k, :"excluded__#{k}"] }.to_h
+          # On conflict update every field. On Postgresql we can refer
+          # to the "conflicting" rows using the "excluded_" prefix:
+          update_clause = columns.map { |k| [k, Sequel.qualify('excluded', k)] }.to_h
           dataset
             .insert_conflict(target: index_keys, update: update_clause)
             .import(columns, tabular_data)
@@ -272,13 +273,13 @@ module Dataflow
             when 'numeric'
               col_type = 'real'
             when 'array', 'hash'
-              puts "Check type of field #{column} (given: #{type}). Not expecting to use JSON."
+              logger.log("Check type of field #{column} (given: #{type}). Not expecting to use JSON.")
               col_type = 'json'
             when 'date', 'time'
               # keep as-is
               col_type = type
             else
-              puts "[Error] unexpected type '#{type}'. Keeping as-is."
+              logger.log("[Error] unexpected type '#{type}'. Keeping as-is.")
               col_type = type
             end
 
@@ -305,12 +306,12 @@ module Dataflow
               case operator
               when '!='
                 if value.is_a? Array
-                  ["#{k} NOT IN ?", value]
+                  Sequel.lit("#{k} NOT IN ?", value)
                 else
-                  ["#{k} <> ?", value]
+                  Sequel.lit("#{k} <> ?", value)
                 end
               when '<', '<=', '>', '>=', '~', '~*'
-                ["#{k} #{operator} ?", value]
+                Sequel.lit("#{k} #{operator} ?", value)
               end
             end
           else

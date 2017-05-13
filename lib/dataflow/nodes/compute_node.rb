@@ -333,11 +333,13 @@ module Dataflow
         count_per_process = [limit, equal_split_per_process].min if limit > 0
 
         queries = node.ordered_system_id_queries(batch_size: count_per_process)
+        queries_count = queries.count
 
         parallel_each(queries.each_with_index) do |query, idx|
           send_heartbeat
-          progress = (idx / queries.count.to_f * 100).ceil
+          progress = (idx / queries_count.to_f * 100).ceil
           on_computing_progressed(pct_complete: progress)
+          logger.log("Executing #{name} [Batch #{idx}/#{queries_count}]")
 
           records = node.all(where: query)
 

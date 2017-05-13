@@ -1,5 +1,17 @@
 # Changelog
 
+#### 0.12.0
+- [4a510df] Add support for case insentive regex matching on mysql
+- [63b0771] Add logging to understand the current computation batch progress
+- [df86157] Add support for pg array types
+- [ce04cb3] Add the loose count extension for Sequel Postgres
+- [3618060] Fix Sequel deprecation warnings
+- [1cea32e] Skip logging during tests sessions
+- [fdddf23] Add support for regex matching
+- [b4717c5] Move the refactor the mongo batch insert
+- [e2897df] Use named indexes to reduce their name size
+- [bc4f598] Revert to insert_ignore to support mysql adapter
+
 #### 0.11.0
 - [7c09e8a] Add data_node#drop_dataset! to completely drop the data
 - [ba0532f] Added upsert on psql adapter

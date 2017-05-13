@@ -153,7 +153,13 @@ module Dataflow
           end
           client[write_dataset_name].bulk_write(bulk_ops, ordered: false)
         else
-          save_many(records: records)
+          client[write_dataset_name].insert_many(records, ordered: false)
+        end
+      rescue Mongo::Error::BulkWriteError => e
+        dup_key_error = e.result['writeErrors'].all? { |x| x['code'] == 11_000 }
+        # don't raise if it is errors about duplicated keys
+        unless dup_key_error
+          raise e
         end
       end
 
@@ -273,14 +279,6 @@ module Dataflow
 
         # TODO: add other casts based on the field type
         value
-      end
-
-      def save_many(records:)
-        client[write_dataset_name].insert_many(records, ordered: false)
-      rescue Mongo::Error::BulkWriteError => e
-        dup_key_error = e.result['writeErrors'].all? { |x| x['code'] == 11_000 }
-        # don't raise if it is errors about duplicated keys
-        raise e unless dup_key_error
       end
 
       # Required index format for mongodb:

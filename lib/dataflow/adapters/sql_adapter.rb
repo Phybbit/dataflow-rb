@@ -127,8 +127,8 @@ module Dataflow
       end
 
       # Create queries that permit processing the whole dataset in parallel without using offsets.
-      def ordered_system_id_queries(batch_size:)
-        ids = all(fields: [SYSTEM_ID], sort: { SYSTEM_ID => 1 }).map { |x| x[SYSTEM_ID] }
+      def ordered_system_id_queries(batch_size:, where: {})
+        ids = all(fields: [SYSTEM_ID], where: where, sort: { SYSTEM_ID => 1 }).map { |x| x[SYSTEM_ID] }
         queries_count = (ids.size / batch_size.to_f).ceil
         Array.new(queries_count) do |i|
           from = ids[i * batch_size]

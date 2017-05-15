@@ -163,8 +163,8 @@ module Dataflow
       # Parallel.each(queries) do |query|
       #   process(node.all(where: query))
       # end
-      def ordered_system_id_queries(batch_size:)
-        db_adapter.ordered_system_id_queries(batch_size: batch_size)
+      def ordered_system_id_queries(batch_size:, where: {})
+        db_adapter.ordered_system_id_queries(batch_size: batch_size, where: {})
       end
 
       # Counts how many records matches the condition or all if no condition is given.

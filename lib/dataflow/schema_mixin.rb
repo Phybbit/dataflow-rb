@@ -60,7 +60,7 @@ module Dataflow
       equal_split_per_process = (data_count / Parallel.processor_count.to_f).ceil
       count_per_process = [max_per_process, equal_split_per_process].min
 
-      queries = ordered_system_id_queries(batch_size: count_per_process)
+      queries = ordered_system_id_queries(batch_size: count_per_process, where: where)
 
       sch = schema_inferrer.infer_schema(batch_count: queries.count, extended: extended) do |idx|
         all(where: queries[idx].merge(where))

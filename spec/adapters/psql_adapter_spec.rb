@@ -45,6 +45,13 @@ RSpec.describe Dataflow::Adapters::PsqlAdapter, type: :model do
       expect(queries[2]).to eq({_id: {'>=' => 5, '<=' => 5}})
     end
 
+    it 'support filtering queries for parallel processing' do
+      queries = adapter.ordered_system_id_queries(batch_size: 2, where: {id: {'<' => 3}})
+      expect(queries.count).to eq 2
+      expect(queries[0]).to eq({_id: {'>=' => 1, '<'  => 3}})
+      expect(queries[1]).to eq({_id: {'>=' => 3, '<='  => 4}})
+    end
+
     it 'supports the array type' do
       res = adapter.client["SELECT array_agg(id) as id_list FROM test_table WHERE updated_at = '2016-02-02' GROUP BY updated_at"].to_a
       expect(res).to eq([{ id_list: [1,2,3] }])

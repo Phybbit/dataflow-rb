@@ -30,6 +30,17 @@ RSpec.describe Dataflow::Adapters::MongoDbAdapter, type: :model do
       expect(queries[1]).to eq({'_id' => {'>=' => ids[2], '<'  => ids[4]}})
       expect(queries[2]).to eq({'_id' => {'>=' => ids[4], '<=' => ids[4]}})
     end
+
+    it 'support filtering queries for parallel processing' do
+      ids = adapter.all(fields: ['_id'], where: {id: {'<' => 3}}, sort: {'_id' => 1}).map { |x| x['_id'].to_s }
+      expect(ids.size).to eq 4
+
+      queries = adapter.ordered_system_id_queries(batch_size: 2, where: {id: {'<' => 3}})
+
+      expect(queries.count).to eq 2
+      expect(queries[0]).to eq({'_id' => {'>=' => ids[0], '<'  => ids[2]}})
+      expect(queries[1]).to eq({'_id' => {'>=' => ids[2], '<='  => ids[3]}})
+    end
   end
 
   context 'write' do

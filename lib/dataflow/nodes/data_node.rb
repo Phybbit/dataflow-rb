@@ -24,11 +24,19 @@ module Dataflow
       # make sure we have only one node per db/table combination
       index({ db_name: 1, name: 1 }, unique: true)
 
+      # The dataset name used by this node for storage.
+      field :name, type: String, editable: false
+
       # The database name used by this node
       field :db_name, type: String, editable: false
-
-      # The dataset name used by this node for storage.
-      field :name, type: String
+      # The database host (used the ENV settings by default)
+      field :db_host, type: String, editable: false
+      # The database port (used the ENV settings by default)
+      field :db_port, type: String, editable: false
+      # The database user (used the ENV settings by default)
+      field :db_user, type: String, editable: false
+      # The database password (used the ENV settings by default)
+      field :db_password, type: String, editable: false
 
       # The schema of this node
       field :schema,                  type: Hash,    editable: false

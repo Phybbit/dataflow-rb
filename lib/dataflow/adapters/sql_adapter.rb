@@ -9,23 +9,28 @@ module Dataflow
         # @param settings [Hash] Represents the connection settings to the DB.
         # @param db_name [String] The database name to which the client will connect.
         # @return [Sequel::Database] a sequel database object.
-        def client(settings, db_name: nil)
+        def client(settings)
           @clients ||= {}
+
+          host = settings.db_host
+          port = settings.db_port
+          user = settings.db_user
+          password = settings.db_password
 
           case settings.adapter_type
           when 'mysql2'
-            host = ENV['MOJACO_MYSQL_ADDRESS'] || '127.0.0.1'
-            port = ENV['MOJACO_MYSQL_PORT'] || '3306'
-            user = ENV['MOJACO_MYSQL_USER']
-            password = ENV['MOJACO_MYSQL_PASSWORD']
+            host ||= ENV['MOJACO_MYSQL_ADDRESS'] || '127.0.0.1'
+            port ||= ENV['MOJACO_MYSQL_PORT'] || '3306'
+            user ||= ENV['MOJACO_MYSQL_USER']
+            password ||= ENV['MOJACO_MYSQL_PASSWORD']
           when 'postgresql'
-            host = ENV['MOJACO_POSTGRESQL_ADDRESS'] || '127.0.0.1'
-            port = ENV['MOJACO_POSTGRESQL_PORT'] || '5432'
-            user = ENV['MOJACO_POSTGRESQL_USER']
-            password = ENV['MOJACO_POSTGRESQL_PASSWORD']
+            host ||= ENV['MOJACO_POSTGRESQL_ADDRESS'] || '127.0.0.1'
+            port ||= ENV['MOJACO_POSTGRESQL_PORT'] || '5432'
+            user ||= ENV['MOJACO_POSTGRESQL_USER']
+            password ||= ENV['MOJACO_POSTGRESQL_PASSWORD']
           end
 
-          db_name ||= settings.db_name
+          db_name = settings.db_name
           user_password = user
           user_password += ":#{password}" if password.present?
 

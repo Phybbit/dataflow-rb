@@ -9,9 +9,21 @@ module Dataflow
       class << self
         def client(settings, db_name: nil)
           @clients ||= {}
-          host = ENV['MOJACO_MONGO_ADDRESS'] || '127.0.0.1'
-          port = '27017'
-          connection_uri = settings.connection_uri || "#{host}:#{port}"
+
+          host = settings.db_host || ENV['MOJACO_MONGO_ADDRESS'] || '127.0.0.1'
+          port = settings.db_port || ENV['MOJACO_MONGO_PORT'] || '27017'
+          user = settings.db_user || ENV['MOJACO_MONGO_USER']
+          password = settings.db_password || ENV['MOJACO_MONGO_USER']
+
+          # if user/password are empty, the user_password will be empty as well
+          user_password = user
+          user_password += ":#{password}" if password.present?
+          user_password += '@' if user_password.present?
+
+          # [username:password@]host1[:port1]
+          uri = "#{user_password}#{host}:#{port}"
+          connection_uri = settings.connection_uri || uri
+
           db_name ||= settings.db_name
           @clients["#{connection_uri}.#{db_name}"] ||= Mongo::Client.new([connection_uri], database: db_name)
         end

@@ -505,24 +505,21 @@ module Dataflow
         Mongoid.disconnect_clients
 
         # set to true to debug code in the iteration
-        is_debugging_impl = (ENV['RACK_ENV'] == 'test' && ENV['DEBUG'])
-        if is_debugging_impl 
-          itr.each do |*args|
-            yield(*args)
-          end
-        else
-          opts = if max_parallel_processes > 0
-                   { in_processes: max_parallel_processes }
-                 else
-                   {}
-                 end
+        is_debugging_impl = ENV['DEBUG_DATAFLOW']
+        opts = if is_debugging_impl
+                 # this will turn of the parallel processing
+                 { in_processes: 0 }
+               elsif max_parallel_processes > 0
+                 { in_processes: max_parallel_processes }
+               else
+                 {}
+               end
 
-          Parallel.each(itr, opts) do |*args|
-            yield(*args)
-            Dataflow::Adapters::SqlAdapter.disconnect_clients
-            Dataflow::Adapters::MongoDbAdapter.disconnect_clients
-            Mongoid.disconnect_clients
-          end
+        Parallel.each(itr, opts) do |*args|
+          yield(*args)
+          Dataflow::Adapters::SqlAdapter.disconnect_clients
+          Dataflow::Adapters::MongoDbAdapter.disconnect_clients
+          Mongoid.disconnect_clients
         end
       end
 

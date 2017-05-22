@@ -35,7 +35,9 @@ module Dataflow
       end
 
       def execute_query
-        data_node.send(:db_adapter).client[computed_query].to_a
+        query = computed_query
+        logger.log(query)
+        data_node.send(:db_adapter).client[query].to_a
       end
 
       private

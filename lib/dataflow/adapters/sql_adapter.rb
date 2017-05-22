@@ -200,7 +200,7 @@ module Dataflow
       def recreate_dataset(dataset: nil)
         dataset ||= settings.write_dataset_name.to_sym
         drop_dataset(dataset)
-        create_table(dataset, @schema)
+        create_table(dataset, @schema, logger)
       end
 
       # drops the given dataset
@@ -258,7 +258,7 @@ module Dataflow
       MAX_INT = 2_147_483_647
       MAX_VARCHAR = 255
 
-      def create_table(dataset, schema)
+      def create_table(dataset, schema, logger)
         client.create_table(dataset.to_sym) do
           # always add an _id field to be used internally
           primary_key SYSTEM_ID

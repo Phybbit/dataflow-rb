@@ -1,5 +1,15 @@
 # Changelog
 
+
+#### 0.13.0 (unreleased)
+- [7390264] Add a read-only data node
+- [dbb14ed] Refactor the debugging implementation
+- [38925a3] Added parameters on the data node to flexibly connec to any database
+- [7aac1eb] Add support for partial (where clause) parallel queries generation.
+
+#### 0.12.1
+- [110ded7] Fix compute node not processing in parallel
+
 #### 0.12.0
 - [4a510df] Add support for case insentive regex matching on mysql
 - [63b0771] Add logging to understand the current computation batch progress

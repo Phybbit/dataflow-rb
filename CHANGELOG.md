@@ -1,7 +1,15 @@
 # Changelog
 
 
-#### 0.13.0 (unreleased)
+#### 0.13.0
+- [b79c96f] Fix a bug in the sql adapter: support multiple ORDER BY clauses
+- [a17f071] Add runtime query node. Make the ops transformation public.
+- [8c78aa2] Added support for a per-node backup/restore
+- [6069ec0] Moved the db settings to the settings class
+- [b5a77fc] Set the last update time using a query directly on the DB. Do not return unneeded information from the recompute/explain method
+- [cc77366] Explain why a node needs an update
+- [e87ba14] Add logging to the sql query node
+- [5d82dfc] Fix logging during the sql table creation.
 - [7390264] Add a read-only data node
 - [dbb14ed] Refactor the debugging implementation
 - [38925a3] Added parameters on the data node to flexibly connec to any database

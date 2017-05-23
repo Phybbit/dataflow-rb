@@ -165,9 +165,11 @@ module Dataflow
         end
 
         return if updated? && !verbose
+
         dependencies.each do |dependency|
           dependency.explain_update(depth: depth + 1, verbose: verbose)
         end
+        true
       end
 
       # Keep a uniform interface with a DataNode.
@@ -268,11 +270,11 @@ module Dataflow
             data_node&.swap_read_write_datasets!
           end
 
-          self.last_compute_starting_time = start_time
-          save
+          set_last_compute_starting_time(start_time)
           duration = Time.now - start_time
           logger.log("#{'>' * (depth + 1)} #{name} took #{duration} seconds to compute.")
           on_computing_finished(state: 'computed')
+          true
         else
           logger.log("#{'>' * (depth + 1)} [IS AWAITING] #{name}.")
           await_computing!
@@ -424,6 +426,17 @@ module Dataflow
         update_query = { '$set' => { last_heartbeat_time: Time.now } }
         Dataflow::Nodes::ComputeNode.where(_id: _id)
                                     .find_one_and_update(update_query)
+      end
+
+      def set_last_compute_starting_time(time)
+        # this is just to avoid the reload.
+        # But this change will not be propagated across processes
+        self.last_compute_starting_time = time
+        # update directly on the DB
+        update_query = { '$set' => { last_compute_starting_time: time } }
+        Dataflow::Nodes::ComputeNode.where(_id: _id)
+                                    .find_one_and_update(update_query)
+
       end
 
       ##############################

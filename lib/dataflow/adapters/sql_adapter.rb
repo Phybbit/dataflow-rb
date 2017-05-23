@@ -228,6 +228,34 @@ module Dataflow
         table_usage.merge(effective_indexes: indexes)
       end
 
+      def transform_to_query(opts)
+        # map to a serie of AND clauses queries
+        opts.flat_map do |k, v|
+          if v.is_a? Hash
+            v.map do |operator, value|
+              case operator
+              when '!='
+                if value.is_a? Array
+                  Sequel.lit("#{k} NOT IN ?", value)
+                else
+                  Sequel.lit("#{k} <> ?", value)
+                end
+              when '<', '<=', '>', '>='
+                Sequel.lit("#{k} #{operator} ?", value)
+              when '~'
+                Sequel.lit("#{k} #{regex_case_senstive_op} ?", value)
+              when '~*'
+                Sequel.lit("#{k} #{regex_case_insensitive_op} ?", value)
+              end
+            end
+          else
+            # e.g. simple match { 'id' => 1} or IN clauses { 'id' => [1,2] }
+            # are supported with simples hashes
+            [[{ k.to_sym => v }]]
+          end
+        end
+      end
+
       private
 
       MAX_INT = 2_147_483_647
@@ -287,34 +315,6 @@ module Dataflow
           res = res.where(*query_args)
         end
         res
-      end
-
-      def transform_to_query(opts)
-        # map to a serie of AND clauses queries
-        opts.flat_map do |k, v|
-          if v.is_a? Hash
-            v.map do |operator, value|
-              case operator
-              when '!='
-                if value.is_a? Array
-                  Sequel.lit("#{k} NOT IN ?", value)
-                else
-                  Sequel.lit("#{k} <> ?", value)
-                end
-              when '<', '<=', '>', '>='
-                Sequel.lit("#{k} #{operator} ?", value)
-              when '~'
-                Sequel.lit("#{k} #{regex_case_senstive_op} ?", value)
-              when '~*'
-                Sequel.lit("#{k} #{regex_case_insensitive_op} ?", value)
-              end
-            end
-          else
-            # e.g. simple match { 'id' => 1} or IN clauses { 'id' => [1,2] }
-            # are supported with simples hashes
-            [[{ k.to_sym => v }]]
-          end
-        end
       end
 
       # Required index format for sequel:

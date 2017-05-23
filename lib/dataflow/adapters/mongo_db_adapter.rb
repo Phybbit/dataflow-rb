@@ -246,16 +246,6 @@ module Dataflow
         `mongorestore #{options} --gzip`
       end
 
-      private
-
-      def write_dataset_name
-        settings.write_dataset_name
-      end
-
-      def read_dataset_name
-        settings.read_dataset_name
-      end
-
       def transform_to_query(opts)
         sanitized_opts = {}
         opts.each do |k, v|
@@ -294,6 +284,16 @@ module Dataflow
           end
         end
         sanitized_opts
+      end
+
+      private
+
+      def write_dataset_name
+        settings.write_dataset_name
+      end
+
+      def read_dataset_name
+        settings.read_dataset_name
       end
 
       def try_cast_value(field, value)

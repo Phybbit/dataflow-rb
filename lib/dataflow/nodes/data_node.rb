@@ -338,6 +338,18 @@ module Dataflow
         db_adapter.drop_dataset(read_dataset_name)
       end
 
+      # Dump a backup of this dataset to a file.
+      # @return [String] the filepath to the dump file.
+      def dump_dataset(base_folder: './dump')
+        db_adapter.dump(base_folder: base_folder)
+      end
+
+      # Restore a dump of this dataset
+      # @param files [String] the filepath to the dump file.
+      def restore_dataset(filepath:)
+        db_adapter.restore(filepath: filepath)
+      end
+
       private
 
       def db_adapter(connection_opts = {})

@@ -14,10 +14,6 @@ module Dataflow
       Dataflow::Nodes::ComputeNode.find(id)
     end
 
-    def updated?
-      true
-    end
-
     def recompute(*args)
       # Interface only, for recursion purposes
     end

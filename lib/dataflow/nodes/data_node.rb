@@ -305,6 +305,13 @@ module Dataflow
         (db_backend.to_s =~ /sql/).present?
       end
 
+      def updated?
+        true
+      end
+
+      def explain_update(depth: 0, verbose: false)
+        logger.log("#{'>' * (depth + 1)} #{name} [Dataset] | UPDATED = #{updated_at}")
+      end
 
       def required_by
         super + Dataflow::Nodes::ComputeNode.where(data_node_id: _id).map { |node|

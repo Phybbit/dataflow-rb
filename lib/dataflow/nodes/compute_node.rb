@@ -156,6 +156,20 @@ module Dataflow
         true
       end
 
+      # Logs out the dependencies tree update time and whether
+      # it should or not be updated. Useful to understand
+      # why a given nodes had to be recomputed.
+      def explain_update(depth: 0, verbose: false)
+        if depth == 0 || !updated? || verbose
+          logger.log("#{'>' * (depth + 1)} #{name} [COMPUTE] | #{updated? ? 'UPDATED' : 'OLD'} = #{updated_at}")
+        end
+
+        return if updated? && !verbose
+        dependencies.each do |dependency|
+          dependency.explain_update(depth: depth + 1, verbose: verbose)
+        end
+      end
+
       # Keep a uniform interface with a DataNode.
       def updated_at
         last_compute_starting_time
@@ -183,11 +197,11 @@ module Dataflow
       #        even if the node is already up to date.
       def recompute(depth: 0, force_recompute: false)
         send_heartbeat
-        logger.log "#{'>' * (depth + 1)} #{name} started recomputing..."
+        logger.log("#{'>' * (depth + 1)} #{name} started recomputing...")
         start_time = Time.now
 
         parallel_each(dependencies) do |dependency|
-          logger.log "#{'>' * (depth + 1)} #{name} checking deps: #{dependency.name}..."
+          logger.log("#{'>' * (depth + 1)} #{name} checking deps: #{dependency.name}...")
           if !dependency.updated? || force_recompute
             dependency.recompute(depth: depth + 1, force_recompute: force_recompute)
           end
@@ -196,11 +210,11 @@ module Dataflow
 
         # Dependencies data may have changed in a child process.
         # Reload to make sure we have the latest metadata.
-        logger.log "#{'>' * (depth + 1)} #{name} reloading dependencies..."
+        logger.log("#{'>' * (depth + 1)} #{name} reloading dependencies...")
         dependencies(reload: true)
 
         compute(depth: depth, force_compute: force_recompute)
-        logger.log "#{'>' * (depth + 1)} #{name} took #{Time.now - start_time} seconds to recompute."
+        logger.log("#{'>' * (depth + 1)} #{name} took #{Time.now - start_time} seconds to recompute.")
 
         true
       end
@@ -216,13 +230,13 @@ module Dataflow
         validate!
 
         if updated? && !force_compute
-          logger.log "#{'>' * (depth + 1)} #{name} is up-to-date."
+          logger.log("#{'>' * (depth + 1)} #{name} is up-to-date.")
           return
         end
 
         has_compute_lock = acquire_computing_lock!
         if has_compute_lock
-          logger.log "#{'>' * (depth + 1)} #{name} started computing."
+          logger.log("#{'>' * (depth + 1)} #{name} started computing.")
           on_computing_started
           start_time = Time.now
 
@@ -257,12 +271,12 @@ module Dataflow
           self.last_compute_starting_time = start_time
           save
           duration = Time.now - start_time
-          logger.log "#{'>' * (depth + 1)} #{name} took #{duration} seconds to compute."
+          logger.log("#{'>' * (depth + 1)} #{name} took #{duration} seconds to compute.")
           on_computing_finished(state: 'computed')
         else
-          logger.log "#{'>' * (depth + 1)} [IS AWAITING] #{name}."
+          logger.log("#{'>' * (depth + 1)} [IS AWAITING] #{name}.")
           await_computing!
-          logger.log "#{'>' * (depth + 1)} [IS DONE AWAITING] #{name}."
+          logger.log("#{'>' * (depth + 1)} [IS DONE AWAITING] #{name}.")
         end
 
       rescue StandardError => e

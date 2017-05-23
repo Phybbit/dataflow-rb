@@ -17,7 +17,7 @@ RSpec.describe Dataflow::Nodes::DataNode, type: :model do
 
       data.each { |d| MysqlTestClient[:node].insert(d) }
 
-      node.import(connection_opts: {db_backend: :mysql, connection_uri: 'mysql2://root@localhost/dataflow_test', dataset_name: 'node'})
+      node.import(connection_opts: {db_backend: :mysql, connection_uri: 'mysql2://root@localhost', db_name: 'dataflow_test', dataset_name: 'node'})
       expect(node.all).to eq(data)
     end
 

@@ -357,9 +357,9 @@ module Dataflow
           @csv_adapter ||= Adapters::CsvAdapter.new(data_node: self)
           return @csv_adapter
         when 'mysql'
-          opts[:adapter_type] = 'mysql2'
+          opts[:adapter_type] = 'mysql'
           return Adapters::SqlAdapter.new(opts) if has_options
-          @mysql_adapter ||= Adapters::MysqlAdapter.new(data_node: self, adapter_type: 'mysql2')
+          @mysql_adapter ||= Adapters::MysqlAdapter.new(data_node: self, adapter_type: 'mysql')
           return @mysql_adapter
         when 'postgresql'
           opts[:adapter_type] = 'postgresql'

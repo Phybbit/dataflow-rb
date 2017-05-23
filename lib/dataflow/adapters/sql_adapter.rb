@@ -11,40 +11,15 @@ module Dataflow
         # @return [Sequel::Database] a sequel database object.
         def client(settings)
           @clients ||= {}
-
-          host = settings.db_host
-          port = settings.db_port
-          user = settings.db_user
-          password = settings.db_password
-
-          case settings.adapter_type
-          when 'mysql2'
-            host ||= ENV['MOJACO_MYSQL_ADDRESS'] || '127.0.0.1'
-            port ||= ENV['MOJACO_MYSQL_PORT'] || '3306'
-            user ||= ENV['MOJACO_MYSQL_USER']
-            password ||= ENV['MOJACO_MYSQL_PASSWORD']
-          when 'postgresql'
-            host ||= ENV['MOJACO_POSTGRESQL_ADDRESS'] || '127.0.0.1'
-            port ||= ENV['MOJACO_POSTGRESQL_PORT'] || '5432'
-            user ||= ENV['MOJACO_POSTGRESQL_USER']
-            password ||= ENV['MOJACO_POSTGRESQL_PASSWORD']
-          end
-
-          db_name = settings.db_name
-          user_password = user
-          user_password += ":#{password}" if password.present?
-
-          uri = "#{settings.adapter_type}://#{user_password}@#{host}:#{port}"
-          connection_uri = settings.connection_uri || "#{uri}/#{db_name}"
-
+          connection_uri = settings.connection_uri_or_default
           return @clients[connection_uri] if @clients[connection_uri].present?
 
           # first, make sure the DB is created (if it is not an external db)
           is_external_db = settings.connection_uri.present?
-          try_create_db(uri, db_name, user, password) unless is_external_db
+          try_create_db(connection_uri, settings.db_name) unless is_external_db
 
           # then, create the connection object
-          db = Sequel.connect("#{connection_uri}?encoding=utf8")
+          db = Sequel.connect("#{connection_uri}/#{settings.db_name}?encoding=utf8")
           add_extensions(settings, db)
           @clients[connection_uri] = db
         end
@@ -53,8 +28,8 @@ module Dataflow
         # @param uri [String] the connection uri to the DB.
         # @param db_name [String] the database name.
         # @return [Boolean] whether the db was created or not.
-        def try_create_db(uri, db_name, user, password)
-          Sequel.connect(uri, user: user, password: password) do |db|
+        def try_create_db(uri, db_name)
+          Sequel.connect(uri) do |db|
             db.run("CREATE DATABASE #{db_name}")
             true
           end

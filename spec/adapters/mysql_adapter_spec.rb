@@ -104,6 +104,6 @@ RSpec.describe Dataflow::Adapters::MysqlAdapter, type: :model do
                                    indexes: indexes})
   }
   let(:adapter) {
-    Dataflow::Adapters::MysqlAdapter.new(data_node: data_node, adapter_type: 'mysql2')
+    Dataflow::Adapters::MysqlAdapter.new(data_node: data_node, adapter_type: 'mysql')
   }
 end

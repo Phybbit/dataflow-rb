@@ -88,7 +88,7 @@ module Dataflow
 
         (sort || {}).each do |k, v|
           sort_value = v == 1 ? k.to_sym : Sequel.desc(k.to_sym)
-          res = res.order(sort_value)
+          res = res.order_append(sort_value)
         end
 
         res = res.offset(offset) if offset > 0

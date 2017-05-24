@@ -12,16 +12,17 @@ module Dataflow
         def client(settings)
           @clients ||= {}
           connection_uri = settings.connection_uri_or_default
-          return @clients[connection_uri] if @clients[connection_uri].present?
+          full_uri = "#{connection_uri}/#{settings.db_name}?encoding=utf8"
+          return @clients[full_uri] if @clients[full_uri].present?
 
           # first, make sure the DB is created (if it is not an external db)
           is_external_db = settings.connection_uri.present?
           try_create_db(connection_uri, settings.db_name) unless is_external_db
 
           # then, create the connection object
-          db = Sequel.connect("#{connection_uri}/#{settings.db_name}?encoding=utf8")
+          db = Sequel.connect(full_uri)
           add_extensions(settings, db)
-          @clients[connection_uri] = db
+          @clients[full_uri] = db
         end
 
         # Used internally to try to create the DB automatically.

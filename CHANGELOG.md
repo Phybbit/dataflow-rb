@@ -1,6 +1,9 @@
 # Changelog
 
 
+#### 0.13.1
+- [aa3ed2e] Fix a bug when storing a db connection
+
 #### 0.13.0
 - [b79c96f] Fix a bug in the sql adapter: support multiple ORDER BY clauses
 - [a17f071] Add runtime query node. Make the ops transformation public.

@@ -292,19 +292,15 @@ module Dataflow
                          end
             when 'numeric'
               col_type = 'real'
-            when 'array', 'hash'
-              logger.log("Check type of field #{column} (given: #{type}). Not expecting to use JSON.")
-              col_type = 'json'
             when 'date', 'time'
               # keep as-is
               col_type = type
             else
-              logger.log("[Error] unexpected type '#{type}'. Keeping as-is.")
               col_type = type
             end
 
             # create a column with the given type
-            p "#{column} #{type} -> #{col_type}"
+            logger.log("#{column} #{type} -> #{col_type}")
             column(column.to_sym, col_type)
           end
         end

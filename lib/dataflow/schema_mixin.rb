@@ -51,6 +51,15 @@ module Dataflow
     end
 
     def infer_partial_schema(where:, extended: false)
+      if db_backend == :postgresql
+        # Experimental
+        sch = db_adapter.client.schema(read_dataset_name).to_h
+        sch = sch.reject{ |k, v| k == :_id }.map { |k,v| [k, {type: v[:type].to_s}] }.to_h
+        self.inferred_schema = sch
+        save
+        return sch
+      end
+
       data_count = count(where: where)
       return {} if data_count == 0
 

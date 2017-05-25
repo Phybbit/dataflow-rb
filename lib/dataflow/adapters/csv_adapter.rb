@@ -43,8 +43,8 @@ module Dataflow
       end
 
       # save the given records
-      def save(records:)
-        write_csv_part(records, keys: @schema.keys)
+      def save(records:, part: nil)
+        write_csv_part(records, keys: @schema.keys, part: part)
       end
 
       def on_save_finished
@@ -79,10 +79,10 @@ module Dataflow
 
       def file_parts
         part = "#{settings.db_name}.#{settings.dataset_name}.csv.part_"
-        Dir["#{file_path}.part_*"]
+        Dir["#{file_path}.part_*"].sort
       end
 
-      def write_csv_part(data, keys:)
+      def write_csv_part(data, keys:, part:)
         # prepare the data
         key_tokens = keys.map { |key| record_dig_tokens(key: key) }
         rows = data.map do |datum|
@@ -90,8 +90,8 @@ module Dataflow
         end
 
         # dump in a part file
-        uuid = SecureRandom.hex
-        CSV.open("#{file_path}.part_#{uuid}", 'w') do |csv|
+        part ||= SecureRandom.hex
+        CSV.open("#{file_path}.part_#{part}", 'w') do |csv|
           rows.each { |row| csv << row }
         end
       end

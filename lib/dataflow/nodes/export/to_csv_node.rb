@@ -38,12 +38,12 @@ module Dataflow
 
           queries = node.ordered_system_id_queries(batch_size: count_per_process)
 
-          parallel_each(queries.each_with_index) do |query, _idx|
+          parallel_each(queries.each_with_index) do |query, idx|
             # TODO: re-enabled event on_export_progressed
             # progress = (idx / queries.count.to_f * 100).ceil
             # on_export_progressed(pct_complete: progress)
             batch = node.all(where: query.merge(where), fields: sch.keys)
-            csv_adapter.save(records: batch)
+            csv_adapter.save(records: batch, part: idx.to_s.rjust(queries.count.to_s.length, "0"))
           end
 
           # needed by the csv exporter to finalize in a single file

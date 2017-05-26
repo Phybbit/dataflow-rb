@@ -243,6 +243,8 @@ module Dataflow
                 end
               when '<', '<=', '>', '>='
                 Sequel.lit("#{k} #{operator} ?", value)
+              when '@>', '<@'
+                Sequel.lit("#{k} #{operator} ?", Sequel.pg_array(Array(value)))
               when '~'
                 Sequel.lit("#{k} #{regex_case_senstive_op} ?", value)
               when '~*'

@@ -3,38 +3,36 @@ module Dataflow
   module Nodes
     # Only supports read operations
     class ReadOnlyDataNode < DataNode
-
       def set_defaults
         super
         self.use_double_buffering = false
       end
 
-
       def handle_dataset_settings_changed
         # ignore - do not do anyhing
       end
 
-      def add(*args)
+      def add(*_args)
         raise_read_only_error!
       end
 
-      def clear(*args)
+      def clear(*_args)
         raise_read_only_error!
       end
 
-      def recreate_dataset(*args)
+      def recreate_dataset(*_args)
         raise_read_only_error!
       end
 
-      def create_unique_indexes(*args)
+      def create_unique_indexes(*_args)
         raise_read_only_error!
       end
 
-      def create_non_unique_indexes(*args)
+      def create_non_unique_indexes(*_args)
         raise_read_only_error!
       end
 
-      def read_dataset_name=(*args)
+      def read_dataset_name=(*_args)
         raise_read_only_error!
       end
 
@@ -42,21 +40,27 @@ module Dataflow
         raise_read_only_error!
       end
 
-      def import(*args)
+      def import(*_args)
         raise_read_only_error!
       end
 
-
       def drop_dataset!
+        raise_read_only_error!
+      end
+
+      def dump_dataset(*_args)
+        raise_read_only_error!
+      end
+
+      def restore_dataset(*_args)
         raise_read_only_error!
       end
 
       private
 
       def raise_read_only_error!
-        raise NotImplementedError, 'External data nodes are read only'
+        raise NotImplementedError, 'This node is read only'
       end
-
     end # class ExternalDataNode
   end # module Nodes
 end # module Dataflow

@@ -38,12 +38,12 @@ module Dataflow
       end
 
       def restore(filepath:)
-        options = "--table=#{@settings.read_dataset_name}"
-        options += "--host=#{@settings.db_host}" if @settings.db_host.present?
-        options += "--port=#{@settings.db_port}" if @settings.db_port.present?
-        options += "--username=#{@settings.db_user}" if @settings.db_user.present?
+        options = "--table=#{@settings.read_dataset_name} "
+        options += "--host=#{@settings.db_host} " if @settings.db_host.present?
+        options += "--port=#{@settings.db_port} " if @settings.db_port.present?
+        options += "--username=#{@settings.db_user} " if @settings.db_user.present?
         password = "PGPASSWORD=#{@settings.db_password} " if @settings.db_password.present?
-        p "#{password}pg_restore #{options} -Fc --dbname=#{@settings.db_name} #{filepath}"
+        drop_dataset(@settings.read_dataset_name)
         `#{password}pg_restore #{options} -Fc --dbname=#{@settings.db_name} #{filepath}`
       end
     end

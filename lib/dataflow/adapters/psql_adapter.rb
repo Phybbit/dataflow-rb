@@ -26,13 +26,13 @@ module Dataflow
       end
 
       def dump(base_folder:)
-        archive_path = "#{base_folder}/#{@settings.db_name}.#{@settings.dataset_name}.dump"
-        options = "--table=public.#{@settings.read_dataset_name}"
-        options += "--host=#{@settings.db_host}" if @settings.db_host.present?
-        options += "--port=#{@settings.db_port}" if @settings.db_port.present?
-        options += "--username=#{@settings.db_user}" if @settings.db_user.present?
+        archive_path = "#{base_folder}/#{@settings.db_name}/#{@settings.dataset_name}.dump"
+        options = "--table=public.#{@settings.read_dataset_name} "
+        options += "--host=#{@settings.db_host} " if @settings.db_host.present?
+        options += "--port=#{@settings.db_port} " if @settings.db_port.present?
+        options += "--username=#{@settings.db_user} " if @settings.db_user.present?
         password = "PGPASSWORD=#{@settings.db_password} " if @settings.db_password.present?
-        `mkdir -p #{base_folder}`
+        `mkdir -p #{base_folder}/#{@settings.db_name}`
         `#{password}pg_dump #{options} -Fc #{@settings.db_name} > #{archive_path}`
         archive_path
       end

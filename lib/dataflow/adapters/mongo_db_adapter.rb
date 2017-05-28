@@ -226,13 +226,13 @@ module Dataflow
       end
 
       def dump(base_folder:)
-        archive_path = "#{base_folder}/#{@settings.db_name}.#{@settings.dataset_name}.gz"
+        archive_path = "#{base_folder}/#{@settings.db_name}/#{@settings.dataset_name}.gz"
         options = "--archive=#{archive_path} --db=#{@settings.db_name} --collection=#{read_dataset_name}"
         options += "--host=#{@settings.db_host}" if @settings.db_host.present?
         options += "--port=#{@settings.db_port}" if @settings.db_port.present?
         options += "--username=#{@settings.db_user}" if @settings.db_user.present?
         options += "--password=#{@settings.db_password}" if @settings.db_password.present?
-        `mkdir -p #{base_folder}`
+        `mkdir -p #{base_folder}/#{@settings.db_name}`
         `mongodump #{options} --gzip`
         archive_path
       end

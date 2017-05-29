@@ -32,6 +32,7 @@ module Dataflow
         options += "--port=#{@settings.db_port} " if @settings.db_port.present?
         options += "--username=#{@settings.db_user} " if @settings.db_user.present?
         password = "PGPASSWORD=#{@settings.db_password} " if @settings.db_password.present?
+
         `mkdir -p #{base_folder}/#{@settings.db_name}`
         `#{password}pg_dump #{options} -Fc #{@settings.db_name} > #{archive_path}`
         archive_path
@@ -43,6 +44,7 @@ module Dataflow
         options += "--port=#{@settings.db_port} " if @settings.db_port.present?
         options += "--username=#{@settings.db_user} " if @settings.db_user.present?
         password = "PGPASSWORD=#{@settings.db_password} " if @settings.db_password.present?
+
         drop_dataset(@settings.read_dataset_name)
         `#{password}pg_restore #{options} -Fc --dbname=#{@settings.db_name} #{filepath}`
       end

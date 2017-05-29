@@ -244,7 +244,7 @@ module Dataflow
         options += "--port=#{@settings.db_port} " if @settings.db_port.present?
         options += "--username=#{@settings.db_user} " if @settings.db_user.present?
         options += "--password=#{@settings.db_password} " if @settings.db_password.present?
-        
+
         `mongorestore #{options} --drop --gzip`
       end
 

@@ -37,7 +37,7 @@ module Dataflow
       end
 
       def open_communication_channel
-        conn = Bunny.new
+        conn = Bunny.new(ENV['MOJACO_RABBITMQ_URI'])
         conn.start
 
         ch = conn.create_channel

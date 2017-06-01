@@ -6,7 +6,7 @@ module Dataflow
   class RemoteWorker
     class << self
       def work(work_queue_name = 'dataflow.ruby')
-        conn = Bunny.new
+        conn = Bunny.new(ENV['MOJACO_RABBITMQ_URI'])
         conn.start
 
         ch = conn.create_channel

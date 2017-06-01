@@ -17,6 +17,8 @@ require 'dataflow/logger'
 require 'dataflow/properties_mixin'
 require 'dataflow/schema_mixin'
 require 'dataflow/node'
+require 'dataflow/executor'
+require 'dataflow/remote_worker'
 
 require 'dataflow/adapters/csv_adapter'
 require 'dataflow/adapters/mongo_db_adapter'
@@ -26,6 +28,7 @@ require 'dataflow/adapters/psql_adapter'
 require 'dataflow/adapters/settings'
 
 require 'dataflow/errors/invalid_configuration_error'
+require 'dataflow/errors/remote_execution_error'
 
 require 'dataflow/nodes/mixin/add_internal_timestamp'
 require 'dataflow/nodes/mixin/rename_dotted_fields'

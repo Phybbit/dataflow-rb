@@ -26,7 +26,6 @@ require 'dataflow/adapters/psql_adapter'
 require 'dataflow/adapters/settings'
 
 require 'dataflow/errors/invalid_configuration_error'
-require 'dataflow/errors/not_implemented_error'
 
 require 'dataflow/nodes/mixin/add_internal_timestamp'
 require 'dataflow/nodes/mixin/rename_dotted_fields'

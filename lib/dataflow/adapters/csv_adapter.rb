@@ -27,7 +27,7 @@ module Dataflow
 
       # retrieve a single element from a data node
       def find(where: opts = {})
-        raise Errors::NotImplementedError, '#find is not yet support on CSV.'
+        raise NotImplementedError, '#find is not yet support on CSV.'
       end
 
       # retrieve all elements from a data node
@@ -52,7 +52,7 @@ module Dataflow
       end
 
       def remove(_opts = {})
-        raise Errors::NotImplementedError, '#find is not yet support on CSV.'
+        raise NotImplementedError, '#find is not yet support on CSV.'
       end
 
       def recreate_dataset(dataset: nil)

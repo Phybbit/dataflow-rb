@@ -380,7 +380,7 @@ module Dataflow
           return @postgresql_adapter
         end
 
-        raise Errors::NotImplementedError, "'#{db_backend}' backend is not implemented."
+        raise NotImplementedError, "'#{db_backend}' backend is not implemented."
       end
 
       def valid_dataset_names

@@ -2,7 +2,7 @@
 
 def make_data_node_params(name, opts = {})
   params = {
-    db_name: 'dataflow_test',
+    db_name: TEST_DB_NAME,
     name: name
   }
   params.reverse_merge!(opts)

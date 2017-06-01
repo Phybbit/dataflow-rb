@@ -57,6 +57,16 @@ module Dataflow
       # The node name
       field :name,                        type: String
 
+      # The execution model:
+      field :execution_model,             type: Symbol, default: :local
+
+      # For remote computation only:
+      # Controls on which queue this execution wi;l be routed
+      field :execution_queue,             type: String, default: 'dataflow.ruby'
+
+      # Unique ID of the current execution
+      field :execution_uuid,              type: BSON::ObjectId
+
       # The data node to which we will write the computation output
       field :data_node_id,                type: BSON::ObjectId
 
@@ -261,7 +271,7 @@ module Dataflow
           end
 
           send_heartbeat
-          compute_impl
+          Executor.execute(self)
 
           if clear_data_on_compute
             # Post-compute, delay creating other indexes for insert speed
@@ -281,6 +291,9 @@ module Dataflow
           logger.log("#{'>' * (depth + 1)} [IS DONE AWAITING] #{name}.")
         end
 
+      rescue Errors::RemoteExecutionError => e
+        on_computing_finished(state: 'error', error: e) if has_compute_lock
+        logger.error(error: e, custom_message: "#{name} failed computing remotely.")
       rescue StandardError => e
         on_computing_finished(state: 'error', error: e) if has_compute_lock
         logger.error(error: e, custom_message: "#{name} failed computing.")
@@ -322,37 +335,67 @@ module Dataflow
         release_computing_lock!
       end
 
+      def execution_valid?(uuid)
+        execution_uuid.to_s == uuid.to_s
+      end
+
       # Keep a compatible interface with the data node
       def schema
         required_schema
       end
 
+      # Interface to execute this node locally
+      def execute_local_computation
+        compute_impl
+      end
+
+      # Interface to execute a part (batch) of this node locally.
+      # This method is called when the framework needs to execute a batch on a worker.
+      # Override when needed, to execute a batch depending on the params.
+      # If you override, you may want to override the make_batch_params as well.
+      def execute_local_batch_computation(batch_params)
+        records = dependencies.first.all(where: batch_params)
+        new_records = compute_batch(records: records)
+        data_node&.add(records: new_records)
+      end
+
+      # Interface used to retrieve the params for scheduled batchs. Override when needed.
+      # The default implemention is to make queries that would
+      # ensure the full processing of the first dependency's records.
+      # @return [Array] of params that are passed to scheduled batches.
+      def make_batch_params
+        make_batch_queries(node: dependencies.first)
+      end
+
       private
 
-      # Compute implementation:
+      # Default compute implementation:
       # - recreate the table
       # - compute the records
       # - save them to the DB
       # (the process may be overwritten on a per-node basis if needed)
+      # Override if you need to have a completely custom compute implementation
       def compute_impl
         process_parallel(node: dependencies.first)
       end
 
+      # This is an interface only.
+      # Override when you can implement a computation in terms of
+      # the records of the first dependent node.
+      # @param records [Array] a batch of records from the first dependency
+      # @return [Array] an array of results that are to be pushed to the data node (if set).
+      def compute_batch(records:)
+        []
+      end
+
       def process_parallel(node:)
-        return if node.blank?
-        record_count = node.count
-        return if record_count == 0
+        queries = make_batch_queries(node: node)
+        return if queries.blank?
 
-        equal_split_per_process = (record_count / Parallel.processor_count.to_f).ceil
-        count_per_process = equal_split_per_process
-        limit = limit_per_process.to_i
-        count_per_process = [limit, equal_split_per_process].min if limit > 0
-
-        queries = node.ordered_system_id_queries(batch_size: count_per_process)
         queries_count = queries.count
-
         parallel_each(queries.each_with_index) do |query, idx|
           send_heartbeat
+
           progress = (idx / queries_count.to_f * 100).ceil
           on_computing_progressed(pct_complete: progress)
           logger.log("Executing #{name} [Batch #{idx}/#{queries_count}]")
@@ -365,25 +408,42 @@ module Dataflow
                           compute_batch(records: records)
                         end
 
-          data_node.add(records: new_records)
+          data_node&.add(records: new_records)
         end
       end
 
-      # This is an interface only.
-      # Override with record computation logic.
-      def compute_batch(records:)
-        records
+      # Makes queries that support traversing the node's records in parallel without overlap.
+      def make_batch_queries(node:)
+        return [] if node.blank?
+        record_count = node.count
+        return [] if record_count == 0
+
+        equal_split_per_process = (record_count / Parallel.processor_count.to_f).ceil
+        count_per_process = equal_split_per_process
+        limit = limit_per_process.to_i
+        count_per_process = [limit, equal_split_per_process].min if limit > 0
+
+        queries = node.ordered_system_id_queries(batch_size: count_per_process)
       end
 
       def acquire_computing_lock!
         # make sure that any pending changes are saved.
         save
+
+        compute_state = {
+          computing_state: 'computing',
+          computing_started_at: Time.now,
+          execution_uuid: BSON::ObjectId.new
+        }
         find_query = { _id: _id, computing_state: { '$ne' => 'computing' } }
-        update_query = { '$set' => { computing_state: 'computing', computing_started_at: Time.now } }
+        update_query = { '$set' => compute_state }
+
         # send a query directly to avoid mongoid's caching layers
         res = Dataflow::Nodes::ComputeNode.where(find_query).find_one_and_update(update_query)
+
         # reload the model data after the query above
         reload
+
         # the query is atomic so if res != nil, we acquired the lock
         !res.nil?
       end
@@ -391,20 +451,21 @@ module Dataflow
       def release_computing_lock!
         # make sure that any pending changes are saved.
         save
+
         find_query = { _id: _id }
-        update_query = { '$set' => { computing_state: nil, computing_started_at: nil } }
+        update_query = { '$set' => { computing_state: nil, computing_started_at: nil, execution_uuid: nil } }
+
         # send a query directly to avoid mongoid's caching layers
         Dataflow::Nodes::ComputeNode.where(find_query).find_one_and_update(update_query)
+
         # reload the model data after the query above
         reload
       end
 
       def await_computing!
-        start_waiting_at = Time.now
-        # TODO: should the max wait time be dependent on e.g. the recompute interval?
         max_wait_time = 15.minutes
-        while Time.now < start_waiting_at + max_wait_time
-          sleep 2
+        while Time.now < last_heartbeat_time + max_wait_time
+          sleep 5
           # reloads with the data stored on mongodb:
           # something maybe have been changed by another process.
           reload

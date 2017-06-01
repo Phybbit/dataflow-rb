@@ -42,4 +42,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'smarter_csv',      '1.1.0'
   spec.add_dependency 'timeliness',       '~>0.3'
   spec.add_dependency 'chronic',          '~>0.10'
+  spec.add_dependency 'bunny',            '~>2.7'
 end

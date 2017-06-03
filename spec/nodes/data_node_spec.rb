@@ -227,6 +227,17 @@ RSpec.describe Dataflow::Nodes::DataNode, type: :model do
     end
   end
 
+  describe 'error handling' do
+    it 'raises an argument error if the records are not an array' do
+      expect{ node.add(records: 'not an array') }.to raise_error(ArgumentError)
+    end
+
+    it 'handles nil in the records' do
+      node.add(records: [{'id' => 1}, nil])
+      expect(node.all).to eq([{'id' => 1}])
+    end
+  end
+
   describe 'validations' do
     it 'needs the db name and ame to be set' do
       res = Dataflow::Nodes::DataNode.create

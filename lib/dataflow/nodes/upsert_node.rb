@@ -42,6 +42,8 @@ module Dataflow
       end
 
       def add(records:)
+        raise ArgumentError, "records must be an array of documents. Received: '#{records.class}'." unless records.is_a?(Array)
+        records = records.compact
         return if records.blank?
 
         # TODO: create a chain of behavior "before add"

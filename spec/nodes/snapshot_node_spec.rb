@@ -89,6 +89,17 @@ RSpec.describe Dataflow::Nodes::SnapshotNode, type: :model do
     end
   end
 
+  describe 'error handling' do
+    it 'raises an argument error if the records are not an array' do
+      expect{ node.add(records: 'not an array') }.to raise_error(ArgumentError)
+    end
+
+    it 'handles nil in the records' do
+      node.add(records: [{'id' => 1, 'updated_at' => '2016-01-01'}, nil])
+      expect(node.all).to eq([{'id' => 1, 'updated_at' => '2016-01-01'.to_time}])
+    end
+  end
+
   context 'use mojaco timestamp' do
     it 'adds internal update at timestamps' do
       time = '2016-01-01T00:00:00Z'

@@ -184,6 +184,8 @@ module Dataflow
       # Adds the given records to the dataset and updates the updated_at time.
       # @param records [Array] an array of the records to be added.
       def add(records:)
+        raise ArgumentError, "records must be an array of documents. Received: '#{records.class}'." unless records.is_a?(Array)
+        records = records.compact
         return if records.blank?
         db_adapter.save(records: records)
         self.updated_at = Time.now

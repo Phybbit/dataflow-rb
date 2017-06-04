@@ -73,7 +73,6 @@ RSpec.describe Dataflow::Nodes::ComputeNode, type: :model do
     end
 
     class EnsureDataNodeExists < Dataflow::Nodes::ComputeNode
-      ensure_dependencies min: 0
       ensure_data_node_exists
     end
 

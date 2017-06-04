@@ -309,13 +309,9 @@ module Dataflow
       def valid_for_computation?
         # Perform additional checks: also add errors to "self.errors"
         opts = self.class.dependency_opts
-        if opts.key?(:exactly)
-          ensure_exact_dependencies(count: opts[:exactly])
-        elsif opts.key?(:max)
-          ensure_at_most_dependencies(count: opts[:max])
-        else # even if the min is not specified, we need at least 1 dependency
-          ensure_at_least_dependencies(count: opts[:min] || 1)
-        end
+        ensure_exact_dependencies(count: opts[:exactly]) if opts.key?(:exactly)
+        ensure_at_most_dependencies(count: opts[:max])   if opts.key?(:max)
+        ensure_at_least_dependencies(count: opts[:min])  if opts.key?(:min)
         ensure_no_cyclic_dependencies
         ensure_keys_are_set
         ensure_data_node_exists if self.class.data_node_opts[:ensure_exists]
@@ -497,7 +493,6 @@ module Dataflow
         update_query = { '$set' => { last_compute_starting_time: time } }
         Dataflow::Nodes::ComputeNode.where(_id: _id)
                                     .find_one_and_update(update_query)
-
       end
 
       ##############################

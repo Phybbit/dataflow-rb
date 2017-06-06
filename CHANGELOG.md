@@ -1,5 +1,19 @@
 # Changelog
 
+#### 0.14.0
+- [ef8ddcd] Do not assume a minimum of 1 dependency per compute node.
+- [b131bb1] Add type check on the data node #add methods. Filter nil values.
+- [effc5a4] Set the rabbitmq as coming from the env
+- [577ea2e] Add support for computing a node remotely.
+- [4a450c3] Remove the custom not implemented error and use the default one.
+- [f9c48c5] Added some new lines
+- [336b9f8] Fix the backup options
+- [2b2fbee] Make the runtime query node a subclass of the read only data node
+- [fe237c4] Change the backup structure to isolate the db name by folder
+- [654927f] Experiment with querying arrays
+- [506f105] Order by system id when exporting
+- [fa8fdc3] Keep the data ordered when exporting to csv
+- [5e1718d] Add support for postgresql when inferring partial schemas (needed for export)
 
 #### 0.13.1
 - [aa3ed2e] Fix a bug when storing a db connection

@@ -47,6 +47,7 @@ module Dataflow
 
         drop_dataset(dataset_name)
         `#{password}pg_restore #{options} -Fc --dbname=#{@settings.db_name} #{filepath}`
+        create_indexes(dataset: dataset_name, type: all)
       end
     end
   end

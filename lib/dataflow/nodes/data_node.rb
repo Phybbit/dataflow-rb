@@ -316,9 +316,9 @@ module Dataflow
       end
 
       def required_by
-        super + Dataflow::Nodes::ComputeNode.where(data_node_id: _id).map { |node|
+        super + Dataflow::Nodes::ComputeNode.where(data_node_id: _id).map do |node|
           { node: node, type: 'dataset' }
-        }
+        end
       end
 
       # this is not safe if there is some parallel processing going on
@@ -341,15 +341,44 @@ module Dataflow
       end
 
       # Dump a backup of this dataset to a file.
-      # @return [String] the filepath to the dump file.
+      # @return [String] the filepath to the dump file. The filename is
+      #         formatted as <node_name>.<read_dataset_idx>.<ext>
       def dump_dataset(base_folder: './dump')
-        db_adapter.dump(base_folder: base_folder)
+        read_idx = 0
+        read_idx = read_dataset_idx if use_double_buffering
+
+        db_adapter.dump(base_folder: base_folder, read_dataset_idx: read_idx)
       end
 
       # Restore a dump of this dataset
-      # @param files [String] the filepath to the dump file.
+      # @param files [String] the filepath to the dump file. The filename has
+      #              to be formatted as <node_name>.<read_dataset_idx>.<ext>
       def restore_dataset(filepath:)
-        db_adapter.restore(filepath: filepath)
+        filename = filepath.split('/')[-1]
+        read_idx = if filename.count('.') < 2
+                     # for compatibility reasons: previously we were not
+                     # exporting the read idx in the filename
+                     0
+                   else
+                     filename.split('.')[1].to_i
+                   end
+
+        raise "Called #restore_dataset with incompatible datasets settings: #{filepath} contains a single buffer dataset but node '#{name}' is expecting a double buffered one." if read_idx == 0 && use_double_buffering
+        raise "Called #restore_dataset with incompatible datasets settings: #{filepath} contains a double buffer dataset but node '#{name}' is expecting a single buffered one." if read_idx > 0 && !use_double_buffering
+
+        if use_double_buffering
+          dataset_name = valid_dataset_names[read_idx - 1]
+        else
+          dataset_name = name
+        end
+
+        db_adapter.restore(filepath: filepath, dataset_name: dataset_name)
+        self.read_dataset_idx = read_idx
+        save
+
+        db_adapter.update_settings(data_node: self)
+
+        true
       end
 
       private

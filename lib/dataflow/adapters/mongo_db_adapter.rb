@@ -225,8 +225,8 @@ module Dataflow
         }
       end
 
-      def dump(base_folder:)
-        archive_path = "#{base_folder}/#{@settings.db_name}/#{@settings.dataset_name}.gz"
+      def dump(base_folder:, read_dataset_idx:)
+        archive_path = "#{base_folder}/#{@settings.db_name}/#{@settings.dataset_name}.#{read_dataset_idx}.gz"
         options = "--archive=#{archive_path} --db=#{@settings.db_name} --collection=#{read_dataset_name} "
         options += "--host=#{@settings.db_host} " if @settings.db_host.present?
         options += "--port=#{@settings.db_port} " if @settings.db_port.present?
@@ -238,8 +238,8 @@ module Dataflow
         archive_path
       end
 
-      def restore(filepath:)
-        options = "--archive=#{filepath} --db=#{@settings.db_name} --collection=#{read_dataset_name} "
+      def restore(filepath:, dataset_name:)
+        options = "--archive=#{filepath} --db=#{@settings.db_name} --collection=#{dataset_name} "
         options += "--host=#{@settings.db_host} " if @settings.db_host.present?
         options += "--port=#{@settings.db_port} " if @settings.db_port.present?
         options += "--username=#{@settings.db_user} " if @settings.db_user.present?

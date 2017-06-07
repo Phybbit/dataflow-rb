@@ -1,11 +1,11 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 RSpec.describe Dataflow::Nodes::DataNode, type: :model do
-
   describe '#import' do
-    let (:data) {
-      [{'a' => 1, 'b' => 'test'}]
-    }
+    let (:data) do
+      [{ 'a' => 1, 'b' => 'test' }]
+    end
 
     it 'imports from mysql' do
       # TODO: re-write with a simple .add when we support it
@@ -17,28 +17,28 @@ RSpec.describe Dataflow::Nodes::DataNode, type: :model do
 
       data.each { |d| MysqlTestClient[:node].insert(d) }
 
-      node.import(connection_opts: {db_backend: :mysql, connection_uri: 'mysql2://root@localhost', db_name: 'dataflow_test', dataset_name: 'node'})
+      node.import(connection_opts: { db_backend: :mysql, connection_uri: 'mysql2://root@localhost', db_name: 'dataflow_test', dataset_name: 'node' })
       expect(node.all).to eq(data)
     end
 
     it 'imports from csv' do
       # TODO: fix this interface access
       adapter = csv_node.send(:db_adapter)
-      adapter.set_schema({'a' => 'string', 'b' => 'string'})
+      adapter.set_schema('a' => 'string', 'b' => 'string')
       adapter.save(records: data)
       adapter.on_save_finished
 
-      node.import(connection_opts: {db_backend: :csv})
+      node.import(connection_opts: { db_backend: :csv })
       expect(node.all).to eq(data)
     end
   end
 
-  context "double buffering" do
+  context 'double buffering' do
     before do
       node.use_double_buffering = true
     end
 
-    it "has different read/write dataset names" do
+    it 'has different read/write dataset names' do
       expect(node.read_dataset_name).not_to eq(node.write_dataset_name)
     end
 
@@ -57,54 +57,54 @@ RSpec.describe Dataflow::Nodes::DataNode, type: :model do
   end
 
   describe '#export' do
-    let (:data) {
-      [{'a' => 1, 'b' => 'test'}]
-    }
+    let (:data) do
+      [{ 'a' => 1, 'b' => 'test' }]
+    end
 
     before do
       node.add(records: data)
     end
 
     it 'exports to a different backend' do
-      node.export(connection_opts: {db_backend: :csv})
+      node.export(connection_opts: { db_backend: :csv })
       expect(csv_node.all).to eq data
     end
 
     it 'calls the export_started evt' do
       called = 0
       node.export_started { called += 1 }
-      node.export(connection_opts: {db_backend: :csv})
+      node.export(connection_opts: { db_backend: :csv })
       expect(called).to eq 1
     end
 
     it 'calls the export_finished evt' do
       called = 0
       node.export_finished { called += 1 }
-      node.export(connection_opts: {db_backend: :csv})
+      node.export(connection_opts: { db_backend: :csv })
       expect(called).to eq 1
     end
   end
 
   describe '#sample_data' do
-    let (:data) {
+    let (:data) do
       [
-        {'simple'  => 'value'},
-        {'complex' => {'data' => 'type'} },
-        {'arrays'  => [0, 1, 2]},
-        {'bool'    => false},
+        { 'simple'  => 'value' },
+        { 'complex' => { 'data' => 'type' } },
+        { 'arrays'  => [0, 1, 2] },
+        { 'bool'    => false }
       ]
-    }
-    let (:tabular_data) {
+    end
+    let (:tabular_data) do
       [
-        {'simple'=>'value'},
-        {'complex|data'=>'type'},
-        {'arrays|0'=>0, 'arrays|1'=>1, 'arrays|2'=>2},
-        {'bool'=>false},
+        { 'simple' => 'value' },
+        { 'complex|data' => 'type' },
+        { 'arrays|0' => 0, 'arrays|1' => 1, 'arrays|2' => 2 },
+        { 'bool' => false }
       ]
-    }
+    end
 
     it 'throws if we pass an unsupported mode' do
-      expect{ node.sample_data(mode: :unknown) }.to raise_error(Dataflow::Errors::InvalidConfigurationError)
+      expect { node.sample_data(mode: :unknown) }.to raise_error(Dataflow::Errors::InvalidConfigurationError)
     end
 
     it 'controls the amount of samples returned' do
@@ -133,13 +133,13 @@ RSpec.describe Dataflow::Nodes::DataNode, type: :model do
   describe '#infer_schema' do
     before do
       data = [
-        { 'a' => 1, 'b' => 'string', 'c' => [1, {'test' => 'a'}], 'd' => {'hash'=>'a', 'array_test' => [1,'a']} },
-        { 'a' => 'became mixed', 'c' => [2], 'd' => {'hash'=>'a'}, 'e' => 'new field!' },
+        { 'a' => 1, 'b' => 'string', 'c' => [1, { 'test' => 'a' }], 'd' => { 'hash' => 'a', 'array_test' => [1, 'a'] } },
+        { 'a' => 'became mixed', 'c' => [2], 'd' => { 'hash' => 'a' }, 'e' => 'new field!' },
         { 'f' => true, 'g' => 1, 'h' => 1.0, 'gs' => '1', 'hs' => '1.0' },
         { 'array' => [0, 1, nil, 2] },
         { 'array' => [4] },
         { 'with_nulls' => nil },
-        { 'with_nulls' => [4] },
+        { 'with_nulls' => [4] }
       ]
       node.add(records: data)
     end
@@ -229,12 +229,12 @@ RSpec.describe Dataflow::Nodes::DataNode, type: :model do
 
   describe 'error handling' do
     it 'raises an argument error if the records are not an array' do
-      expect{ node.add(records: 'not an array') }.to raise_error(ArgumentError)
+      expect { node.add(records: 'not an array') }.to raise_error(ArgumentError)
     end
 
     it 'handles nil in the records' do
-      node.add(records: [{'id' => 1}, nil])
-      expect(node.all).to eq([{'id' => 1}])
+      node.add(records: [{ 'id' => 1 }, nil])
+      expect(node.all).to eq([{ 'id' => 1 }])
     end
   end
 
@@ -263,14 +263,58 @@ RSpec.describe Dataflow::Nodes::DataNode, type: :model do
     end
   end
 
+  describe '#dump_dataset, #restore' do
+    it 'dumps and restore' do
+      begin
+        node.add(records: [{ 'id' => 1 }])
+        filepath = node.dump_dataset
+        node.clear
+        expect(node.count).to eq(0)
+
+        node.restore_dataset(filepath: filepath)
+        expect(node.all).to eq([{ 'id' => 1 }])
+      ensure
+        File.delete(filepath)
+      end
+    end
+
+    it 'exports with the dataset idx to 0 for single buffer' do
+      begin
+        filepath = node.dump_dataset
+        expect(filepath).to eq("./dump/#{node.db_name}/#{node.name}.0.gz")
+      ensure
+        File.delete(filepath)
+      end
+    end
+
+    it 'exports with the dataset idx to 1 or 2 for double buffer' do
+      begin
+        node.use_double_buffering = true
+        filepath = node.dump_dataset
+        expect(filepath).to eq("./dump/#{node.db_name}/#{node.name}.1.gz")
+      ensure
+        File.delete(filepath)
+      end
+    end
+
+    it 'raises if trying to restore with incompatible settings (node is a single buffered node)' do
+      expect { node.restore_dataset(filepath: 'test.1.gz') }.to raise_error(RuntimeError)
+    end
+
+    it 'raises if trying to restore with incompatible settings (node is a double buffered node)' do
+      node.use_double_buffering = true
+      expect { node.restore_dataset(filepath: 'test.0.gz') }.to raise_error(RuntimeError)
+    end
+  end
+
   let(:node) { make_data_node('node') }
 
-  let(:csv_node) {
+  let(:csv_node) do
     # make sure the original node is create
     node
     # re-instanciate another one and change its db_backend
     n = Dataflow::Nodes::DataNode.find_by(name: 'node')
     n.db_backend = :csv
     n
-  }
+  end
 end

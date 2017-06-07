@@ -25,8 +25,8 @@ module Dataflow
         '~*'
       end
 
-      def dump(base_folder:)
-        archive_path = "#{base_folder}/#{@settings.db_name}/#{@settings.dataset_name}.dump"
+      def dump(base_folder:, read_dataset_idx:)
+        archive_path = "#{base_folder}/#{@settings.db_name}/#{@settings.dataset_name}.#{read_dataset_idx}.dump"
         options = "--table=public.#{@settings.read_dataset_name} "
         options += "--host=#{@settings.db_host} " if @settings.db_host.present?
         options += "--port=#{@settings.db_port} " if @settings.db_port.present?
@@ -38,14 +38,14 @@ module Dataflow
         archive_path
       end
 
-      def restore(filepath:)
-        options = "--table=#{@settings.read_dataset_name} --no-owner "
+      def restore(filepath:, dataset_name:)
+        options = "--table=#{dataset_name} --no-owner "
         options += "--host=#{@settings.db_host} " if @settings.db_host.present?
         options += "--port=#{@settings.db_port} " if @settings.db_port.present?
         options += "--username=#{@settings.db_user} --role=#{@settings.db_user}" if @settings.db_user.present?
         password = "PGPASSWORD=#{@settings.db_password} " if @settings.db_password.present?
 
-        drop_dataset(@settings.read_dataset_name)
+        drop_dataset(dataset_name)
         `#{password}pg_restore #{options} -Fc --dbname=#{@settings.db_name} #{filepath}`
       end
     end

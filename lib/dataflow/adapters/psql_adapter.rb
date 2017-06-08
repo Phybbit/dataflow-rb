@@ -39,15 +39,13 @@ module Dataflow
       end
 
       def restore(filepath:, dataset_name:)
-        options = "--table=#{dataset_name} --no-owner "
+        options = "--no-owner --clean --if-exists "
         options += "--host=#{@settings.db_host} " if @settings.db_host.present?
         options += "--port=#{@settings.db_port} " if @settings.db_port.present?
         options += "--username=#{@settings.db_user} --role=#{@settings.db_user}" if @settings.db_user.present?
         password = "PGPASSWORD=#{@settings.db_password} " if @settings.db_password.present?
 
-        drop_dataset(dataset_name)
         `#{password}pg_restore #{options} -Fc --dbname=#{@settings.db_name} #{filepath}`
-        create_indexes(dataset: dataset_name, type: all)
       end
     end
   end

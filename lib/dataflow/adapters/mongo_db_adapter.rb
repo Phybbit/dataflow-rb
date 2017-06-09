@@ -48,10 +48,10 @@ module Dataflow
       end
 
       # retrieve all elements from a data node
-      def all(where: {}, fields: [], sort: {}, offset: 0, limit: 0)
+      def all(where: {}, fields: [], sort: {}, offset: 0, limit: 0, include_system_id: false)
         projection = fields.map { |field| [field, 1] }
 
-        unless fields.map(&:to_s).include?(SYSTEM_ID)
+        unless include_system_id || fields.map(&:to_s).include?(SYSTEM_ID)
           # by default, do not select the _id field
           projection << [SYSTEM_ID, 0].freeze
         end

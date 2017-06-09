@@ -77,12 +77,15 @@ module Dataflow
       end
 
       # retrieve all elements from a data node
-      def all(where: {}, fields: [], sort: {}, offset: 0, limit: 0)
+      def all(where: {}, fields: [], sort: {}, offset: 0, limit: 0, include_system_id: false)
         res = client[settings.read_dataset_name.to_sym]
 
         # if there is no fields, automatically
         # select all the fields expect the system _id
-        fields = res.columns.reject { |x| x == SYSTEM_ID } if fields.blank?
+        if fields.blank?
+          fields = res.columns
+          fields = fields.reject { |x| x == SYSTEM_ID } unless include_system_id
+        end
 
         res = res.select(*fields.map(&:to_sym)) if fields.present?
         res = apply_query(res, where)

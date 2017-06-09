@@ -31,7 +31,7 @@ module Dataflow
       end
 
       # retrieve all elements from a data node
-      def all(where: {}, fields: [], sort: {}, offset: 0, limit: 0)
+      def all(where: {}, fields: [], sort: {}, offset: 0, limit: 0, include_system_id: false)
         SmarterCSV.process(file_path, strings_as_keys: true)
       rescue Errno::ENOENT => e
         []

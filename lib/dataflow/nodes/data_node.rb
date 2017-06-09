@@ -143,8 +143,8 @@ module Dataflow
       #        can be called to stream the results rather than load everything in memory.
       #        Other methods can also be called depending on the backend,
       #        the downside being back-end portability (use at your own risk).
-      def all(where: {}, fields: [], sort: {}, limit: 0, offset: 0, &block)
-        db_adapter.all(where: where, fields: fields, sort: sort, limit: limit, offset: offset, &block)
+      def all(where: {}, fields: [], sort: {}, limit: 0, offset: 0, include_system_id: false, &block)
+        db_adapter.all(where: where, fields: fields, sort: sort, limit: limit, offset: offset, include_system_id: include_system_id, &block)
       end
 
       # Supports paginating efficiently through the dataset.

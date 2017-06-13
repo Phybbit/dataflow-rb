@@ -36,7 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'mongoid',          '~>6.0'
   spec.add_dependency 'sequel',           '~>4.0'
   spec.add_dependency 'mysql2',           '~>0.4'
-  spec.add_dependency 'pg',               '~>0.19'
+  spec.add_dependency 'pg',               '0.20'
   spec.add_dependency 'sequel_pg',        '~>1.6'
   spec.add_dependency 'msgpack',          '~>1.0'
   spec.add_dependency 'smarter_csv',      '1.1.0'

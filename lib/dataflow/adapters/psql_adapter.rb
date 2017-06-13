@@ -39,10 +39,10 @@ module Dataflow
       end
 
       def restore(filepath:, dataset_name:)
-        options = "--no-owner --clean --if-exists "
+        options = "-v --clean --if-exists --no-owner  "
         options += "--host=#{@settings.db_host} " if @settings.db_host.present?
         options += "--port=#{@settings.db_port} " if @settings.db_port.present?
-        options += "--username=#{@settings.db_user} --role=#{@settings.db_user}" if @settings.db_user.present?
+        options += "--username=#{@settings.db_user} --role=#{@settings.db_user} " if @settings.db_user.present?
         password = "PGPASSWORD=#{@settings.db_password} " if @settings.db_password.present?
 
         `#{password}pg_restore #{options} -Fc --dbname=#{@settings.db_name} #{filepath}`

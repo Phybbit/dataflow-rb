@@ -55,8 +55,25 @@ RSpec.describe Dataflow::Nodes::ReadOnlyDataNode, type: :model do
     end
   end
 
+  describe '.dataset_name' do
+    it 'remaps the dataset_name from which to read from' do
+      another_node.add(records: [{'id' => 1}])
+      node.dataset_name = 'another_node'
+      expect(node.all).to eq([{'id' => 1}])
+    end
+  end
+
+
   let(:node) {
     params = make_data_node_params('external_node')
     Dataflow::Nodes::ReadOnlyDataNode.create(params)
   }
+
+
+  let(:another_node) {
+    params = make_data_node_params('another_node')
+    Dataflow::Nodes::DataNode.create(params)
+  }
+
+
 end

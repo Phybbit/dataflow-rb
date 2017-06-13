@@ -3,9 +3,20 @@ module Dataflow
   module Nodes
     # Only supports read operations
     class ReadOnlyDataNode < DataNode
+
+      # Support overriding which dataset to read from.
+      # Use this to decouple the name from the dataset name
+      # it will actually access.
+      field :dataset_name, type: String
+
       def set_defaults
         super
         self.use_double_buffering = false
+      end
+
+      def read_dataset_name
+        return dataset_name if dataset_name.present?
+        super
       end
 
       def handle_dataset_settings_changed

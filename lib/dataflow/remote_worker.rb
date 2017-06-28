@@ -36,9 +36,9 @@ module Dataflow
           return
         end
 
-        errors = execute(node, data)
+        results = execute(node, data)
         response = { msg_id: data['msg_id'] }
-        response.merge(errors[0])
+        response.merge(results[0])
       rescue Mongoid::Errors::DocumentNotFound => e
         { error: { message: e.message, backtrace: e.backtrace } }
       end
@@ -47,21 +47,27 @@ module Dataflow
         # execute in a different process, so that once it's finished
         # we can purge the memory
         Parallel.map([payload_data]) do |data|
-          error = {}
+          result = {}
           logger.log("[#{data['msg_id']}] working on '#{node.name}'...")
 
           begin
             if data['is_batch']
-              node.execute_local_batch_computation(data['params'])
+              data = node.execute_local_batch_computation(data['params'])
+              # in ruby, we already have access to the node, so we
+              # add the data directly here instead of returning it through
+              # the queue. The default batch behavior on other languages
+              # is to return the output data in the 'data' key, e.g.:
+              # result['data] = data
+              node.data_node&.add(records: data)
             else
               node.execute_local_computation
             end
           rescue StandardError => e
-            error = { error: { message: e.message, backtrace: e.backtrace } }
+            result = { error: { message: e.message, backtrace: e.backtrace } }
           end
 
           logger.log("[#{data['msg_id']}] done working on '#{node.name}'.")
-          error
+          result
         end
       end
 

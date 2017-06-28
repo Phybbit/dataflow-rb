@@ -63,17 +63,14 @@ RSpec.describe Dataflow::Nodes::ReadOnlyDataNode, type: :model do
     end
   end
 
-
   let(:node) {
     params = make_data_node_params('external_node')
     Dataflow::Nodes::ReadOnlyDataNode.create(params)
   }
 
-
   let(:another_node) {
     params = make_data_node_params('another_node')
     Dataflow::Nodes::DataNode.create(params)
   }
-
 
 end

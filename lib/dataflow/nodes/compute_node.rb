@@ -351,8 +351,7 @@ module Dataflow
       # If you override, you may want to override the make_batch_params as well.
       def execute_local_batch_computation(batch_params)
         records = dependencies.first.all(where: batch_params)
-        new_records = compute_batch(records: records)
-        data_node&.add(records: new_records)
+        compute_batch(records: records)
       end
 
       # Interface used to retrieve the params for scheduled batchs. Override when needed.
@@ -583,9 +582,7 @@ module Dataflow
 
       def parallel_each(itr)
         # before fork: always disconnect currently used connections.
-        Dataflow::Adapters::SqlAdapter.disconnect_clients
-        Dataflow::Adapters::MongoDbAdapter.disconnect_clients
-        Mongoid.disconnect_clients
+        disconnect_db_clients
 
         # set to true to debug code in the iteration
         is_debugging_impl = ENV['DEBUG_DATAFLOW']
@@ -600,10 +597,14 @@ module Dataflow
 
         Parallel.each(itr, opts) do |*args|
           yield(*args)
-          Dataflow::Adapters::SqlAdapter.disconnect_clients
-          Dataflow::Adapters::MongoDbAdapter.disconnect_clients
-          Mongoid.disconnect_clients
+          disconnect_db_clients
         end
+      end
+
+      def disconnect_db_clients
+        Dataflow::Adapters::SqlAdapter.disconnect_clients
+        Dataflow::Adapters::MongoDbAdapter.disconnect_clients
+        Mongoid.disconnect_clients
       end
 
       def logger

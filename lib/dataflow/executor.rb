@@ -28,7 +28,7 @@ module Dataflow
         logger.log("Opened a completion queue for '#{node.name}': #{completion_queue.name}")
 
         messages = send_execution_messages(channel, node, is_batch_execution, completion_queue.name)
-        error_data = await_execution_completion(completion_queue, messages.count)
+        error_data = await_execution_completion(node, completion_queue, messages.count)
         logger.log("Finished processing '#{node.name}'")
 
         raise Errors::RemoteExecutionError.new(error_data['message'], error_data['backtrace']) if error_data
@@ -43,7 +43,7 @@ module Dataflow
         ch = conn.create_channel
         completion_queue = ch.queue('', exclusive: true)
 
-        return conn, ch, completion_queue
+        [conn, ch, completion_queue]
       end
 
       def send_execution_messages(channel, node, is_batch_execution, completion_queue_name)
@@ -76,13 +76,17 @@ module Dataflow
         end
       end
 
-      def await_execution_completion(completion_queue, expected_completion_count)
+      def await_execution_completion(node, completion_queue, expected_completion_count)
         completed_message_indexes = []
         unblock = Queue.new
 
         consumer = completion_queue.subscribe do |_delivery_info, _properties, payload|
           data = JSON.parse(payload)
           unblock.enq(data['error']) if data['error'].present?
+
+          # Support adding the data to the compute's data_node is the
+          # remote process returns anything.
+          node.data_node&.add(records: data['data']) if data['data'].present?
 
           completed_message_indexes << data['msg_id']
           if completed_message_indexes.count == expected_completion_count

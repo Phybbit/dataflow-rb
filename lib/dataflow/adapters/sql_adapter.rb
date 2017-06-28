@@ -53,6 +53,7 @@ module Dataflow
         def disconnect_clients
           @clients ||= {}
           @clients.values.each(&:disconnect)
+          @clients = {}
         end
       end
 

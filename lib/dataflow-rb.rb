@@ -93,7 +93,13 @@ module Dataflow
       super
     rescue NameError => e
       raise e unless e.message =~ /Dataflow::Nodes/
-      p "Warning -- Node class not found. #{e}"
+      
+      @name_errors ||= Set.new
+      unless @name_errors.include?(e.message)
+        p "Warning -- Node class not found. #{e}"
+        @name_errors << e.message
+      end
+
       Dataflow::Nodes::ComputeNode
     end
   end

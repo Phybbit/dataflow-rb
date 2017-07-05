@@ -52,13 +52,13 @@ module Dataflow
 
           begin
             if data['is_batch']
-              data = node.execute_local_batch_computation(data['params'])
+              records = node.execute_local_batch_computation(data['params'])
               # in ruby, we already have access to the node, so we
               # add the data directly here instead of returning it through
               # the queue. The default batch behavior on other languages
               # is to return the output data in the 'data' key, e.g.:
-              # result['data] = data
-              node.data_node&.add(records: data)
+              # result['data] = records
+              node.data_node&.add(records: records)
             else
               node.execute_local_computation
             end

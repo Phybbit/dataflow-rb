@@ -30,6 +30,10 @@ module Dataflow
       true
     end
 
+    def all_dependencies
+      []
+    end
+
     def required_by
       Dataflow::Nodes::ComputeNode.where(dependency_ids: _id).map { |node|
         { node: node, type: 'dependency' }

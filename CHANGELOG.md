@@ -1,5 +1,22 @@
 # Changelog
 
+#### 0.15.0
+
+- [4b48b74] Make sure computed data is included in the dump
+- [54fd18d] Added support for #export #import a dataflow with its data
+- [a63972f] Add #metadata to the nodes
+- [696ea35] Add #all_dependencies interface
+- [5165c71] Fix re-using the same variable in the RemoteWorker results
+- [216a066] Only warn once about a missing node
+- [c101144] Support gettng data back from remote batch workers and adding it to the data node.
+- [9a06ee3] Support remapping the dataset from which to read from on ReadOnlyDataNodes
+- [2fc623a] Setting the clean if exist option to pg restore. Set pg to 0.20
+- [205317c] Support including the system id in the data
+- [0b9b578] Fix restoring postgresql indexes and other constraints
+- [e396265] Make sure indexes are recreated in postgres after a restore
+- [426300a] Add the exported dataset idx in the dump filename. Make sure when restoring that the settings are compatible
+- [ca44a9d] Set the no owner flag when restoring to psql
+
 #### 0.14.0
 - [ef8ddcd] Do not assume a minimum of 1 dependency per compute node.
 - [b131bb1] Add type check on the data node #add methods. Filter nil values.

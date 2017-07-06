@@ -309,6 +309,16 @@ RSpec.describe Dataflow::Nodes::ComputeNode, type: :model do
     end
   end
 
+  describe '#metadata' do
+    it 'formats the metadata as a hash' do
+      metadata = compute_node.metadata
+      expect(metadata[:_id]).to eq(compute_node._id)
+      expect(metadata[:_type]).to eq(compute_node._type)
+      expect(metadata[:name]).to eq(compute_node.name)
+      expect(metadata[:last_compute_starting_time]).to eq(compute_node.last_compute_starting_time)
+    end
+  end
+
   describe '.properties' do
     it 'includes parent properties' do
       expect(NOOPComputeNode.properties[:name]).not_to be nil

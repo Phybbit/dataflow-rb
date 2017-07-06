@@ -39,5 +39,18 @@ module Dataflow
         { node: node, type: 'dependency' }
       }
     end
+
+    def metadata
+      metadata = {
+        _id: self._id,
+        _type: self._type,
+      }
+      properties_data = self.class.properties.keys.map do |property_name|
+        value = self[property_name]
+        [property_name, value]
+      end.to_h
+
+      metadata.merge(properties_data)
+    end
   end
 end

@@ -307,6 +307,18 @@ RSpec.describe Dataflow::Nodes::DataNode, type: :model do
     end
   end
 
+  describe '#metadata' do
+    it 'formats the metadata as a hash' do
+      metadata = node.metadata
+      expect(metadata[:_id]).to eq(node._id)
+      expect(metadata[:_type]).to eq(node._type)
+      expect(metadata[:name]).to eq(node.name)
+      expect(metadata[:updated_at]).to eq(node.updated_at)
+      expect(metadata[:db_backend]).to eq(node.db_backend)
+      expect(metadata[:use_double_buffering]).to eq(node.use_double_buffering)
+    end
+  end
+
   let(:node) { make_data_node('node') }
 
   let(:csv_node) do

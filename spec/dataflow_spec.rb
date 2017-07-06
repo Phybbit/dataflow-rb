@@ -22,6 +22,8 @@ describe Dataflow do
         dependency_ids: [d1.id],
         data_node_id: make_data_node('dataset2')
       )
+      c1.compute
+      computed_data = c1.all
 
       # export
       archive_path = Dataflow.export(nodes: [c1], include_data: true)
@@ -31,6 +33,7 @@ describe Dataflow do
       d1.clear
       d1.delete
       d2 = c1.data_node
+      d2.swap_read_write_datasets!
       c1.data_node_id = nil
       c1.dependency_ids = []
       c1.save
@@ -49,6 +52,7 @@ describe Dataflow do
 
       expect(compute1.data_node).to eq(d2)
       expect(compute1.dependencies).to eq([dataset1])
+      expect(compute1.all).to eq(computed_data)
     ensure
     `rm #{archive_path}` if archive_path
     end

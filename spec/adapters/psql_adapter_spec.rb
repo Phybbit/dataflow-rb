@@ -93,17 +93,17 @@ RSpec.describe Dataflow::Adapters::PsqlAdapter, type: :model do
       expect(adapter.usage(dataset: dataset_name)[:storage]).to be > 0
     end
 
-    it 'fetches the effective indexes' do
+    it 'fetches the db indexes' do
       adapter.create_indexes
       expected_indexes = [
         {'key' => ['id']},
         {'key' => ['updated_at']},
         {'key' => ['id', 'updated_at'], 'unique' => true}
       ]
-      effective_indexes = adapter.usage(dataset: dataset_name)[:effective_indexes]
+      db_indexes = adapter.usage(dataset: dataset_name)[:db_indexes]
 
-      expect(effective_indexes - expected_indexes).to eq([])
-      expect(expected_indexes - effective_indexes).to eq([])
+      expect(db_indexes - expected_indexes).to eq([])
+      expect(expected_indexes - db_indexes).to eq([])
     end
   end
 

@@ -297,7 +297,7 @@ module Dataflow
           updated_at: updated_at,
           record_count: count,
           indexes: indexes,
-          effective_indexes: usage[:effective_indexes],
+          db_indexes: usage[:db_indexes],
           mem_usage: usage[:memory],
           storage_usage: usage[:storage]
         }

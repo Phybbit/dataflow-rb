@@ -218,7 +218,7 @@ RSpec.describe Dataflow::Nodes::ComputeNode, type: :model do
 
       it 'only creates unique indexes before computing' do
         allow(compute_node).to receive(:compute_impl) do
-          expect(compute_node.data_node.info(write_dataset: true)[:effective_indexes]).to eq([{ 'key' => ['id'], 'unique' => true }])
+          expect(compute_node.data_node.info(write_dataset: true)[:db_indexes]).to eq([{ 'key' => ['id'], 'unique' => true }])
         end
 
         compute_node.compute
@@ -227,7 +227,7 @@ RSpec.describe Dataflow::Nodes::ComputeNode, type: :model do
 
       it 'after computing it creates the other indexes' do
         compute_node.compute
-        expect(compute_node.data_node.info[:effective_indexes]).to eq(indexes)
+        expect(compute_node.data_node.info[:db_indexes]).to eq(indexes)
       end
     end
 

@@ -216,13 +216,13 @@ module Dataflow
         {
           memory: result['size'],
           storage: result['storageSize'],
-          effective_indexes: indexes
+          db_indexes: indexes
         }
       rescue Mongo::Error::OperationFailure, Mongo::Error::InvalidCollectionName
         {
           memory: 0,
           storage: 0,
-          effective_indexes: indexes
+          db_indexes: indexes
         }
       end
 

@@ -230,7 +230,7 @@ module Dataflow
       def usage(dataset:)
         indexes = retrieve_collection_indexes(dataset)
         table_usage = fetch_table_usage(dataset: dataset)
-        table_usage.merge(effective_indexes: indexes)
+        table_usage.merge(db_indexes: indexes)
       end
 
       def transform_to_query(opts)

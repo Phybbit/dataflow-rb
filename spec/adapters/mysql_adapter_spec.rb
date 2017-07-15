@@ -73,7 +73,7 @@ RSpec.describe Dataflow::Adapters::MysqlAdapter, type: :model do
         {'key' => ['updated_at']},
         {'key' => ['id', 'updated_at'], 'unique' => true}
       ]
-      db_indexes = adapter.usage(dataset: dataset_name)[:db_indexes]
+      db_indexes = adapter.retrieve_dataset_indexes(dataset_name)
 
       expect(db_indexes - expected_indexes).to eq([])
       expect(expected_indexes - db_indexes).to eq([])

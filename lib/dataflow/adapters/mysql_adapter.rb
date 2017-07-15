@@ -4,7 +4,7 @@ module Dataflow
     # Interface between a data node and mongodb.
     # We use mongodb to perform all the store/retrieve operations.
     class MysqlAdapter < SqlAdapter
-      def fetch_table_usage(dataset:)
+      def usage(dataset:)
         size = client["SELECT data_length + index_length as size from information_schema.TABLES WHERE table_schema = '#{settings.db_name}' and table_name = '#{dataset}'"].first[:size]
         {
           memory: size,

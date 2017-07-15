@@ -227,12 +227,6 @@ module Dataflow
         end
       end
 
-      def usage(dataset:)
-        indexes = retrieve_collection_indexes(dataset)
-        table_usage = fetch_table_usage(dataset: dataset)
-        table_usage.merge(db_indexes: indexes)
-      end
-
       def transform_to_query(opts)
         # map to a serie of AND clauses queries
         opts.flat_map do |k, v|
@@ -261,6 +255,18 @@ module Dataflow
             [[{ k.to_sym => v }]]
           end
         end
+      end
+
+      def retrieve_dataset_indexes(dataset_name)
+        psql_indexes = client.indexes(dataset_name)
+        psql_indexes.values.map do |idx|
+          cols = idx[:columns].map(&:to_s)
+          index = { 'key' => cols }
+          index['unique'] = true if idx[:unique]
+          index
+        end.compact
+      rescue Sequel::DatabaseError
+        []
       end
 
       private
@@ -328,18 +334,6 @@ module Dataflow
         params = [keys]
         params << { unique: true } if index[:unique]
         params
-      end
-
-      def retrieve_collection_indexes(dataset_name)
-        psql_indexes = client.indexes(dataset_name)
-        psql_indexes.values.map do |idx|
-          cols = idx[:columns].map(&:to_s)
-          index = { 'key' => cols }
-          index['unique'] = true if idx[:unique]
-          index
-        end.compact
-      rescue Sequel::DatabaseError
-        []
       end
 
       def logger

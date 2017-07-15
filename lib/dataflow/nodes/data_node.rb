@@ -297,10 +297,15 @@ module Dataflow
           updated_at: updated_at,
           record_count: count,
           indexes: indexes,
-          db_indexes: usage[:db_indexes],
+          db_indexes: db_indexes(write_dataset: write_dataset),
           mem_usage: usage[:memory],
           storage_usage: usage[:storage]
         }
+      end
+
+      def db_indexes(write_dataset: false)
+        dataset = write_dataset ? write_dataset_name : read_dataset_name
+        db_adapter.retrieve_dataset_indexes(dataset)
       end
 
       def use_symbols?

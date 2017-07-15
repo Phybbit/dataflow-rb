@@ -102,7 +102,7 @@ RSpec.describe Dataflow::Adapters::MongoDbAdapter, type: :model do
         {'key' => ['id', 'updated_at'], 'unique' => true}
       ]
 
-      expect(adapter.usage(dataset: dataset_name)[:db_indexes]).to eq(expected_indexes)
+      expect(adapter.retrieve_dataset_indexes(dataset_name)).to eq(expected_indexes)
     end
   end
 

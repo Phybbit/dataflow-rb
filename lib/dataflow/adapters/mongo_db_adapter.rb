@@ -210,19 +210,16 @@ module Dataflow
       end
 
       def usage(dataset:)
-        indexes = retrieve_collection_indexes(dataset)
         command = { collstats: dataset }
         result = client.database.command(command).documents[0]
         {
           memory: result['size'],
           storage: result['storageSize'],
-          db_indexes: indexes
         }
       rescue Mongo::Error::OperationFailure, Mongo::Error::InvalidCollectionName
         {
           memory: 0,
           storage: 0,
-          db_indexes: indexes
         }
       end
 
@@ -289,6 +286,18 @@ module Dataflow
         sanitized_opts
       end
 
+      def retrieve_dataset_indexes(collection)
+        mongo_indexes = client[collection].indexes
+        mongo_indexes.map do |idx|
+          # skip the default index
+          next if idx['key'].keys == ['_id']
+
+          index = { 'key' => idx['key'].keys }
+          index['unique'] = true if idx['unique']
+          index
+        end.compact
+      end
+
       private
 
       def write_dataset_name
@@ -321,18 +330,6 @@ module Dataflow
         index = { key: index_key, name: name }
         index[:unique] = true if dataset_index[:unique]
         index
-      end
-
-      def retrieve_collection_indexes(collection)
-        mongo_indexes = client[collection].indexes
-        mongo_indexes.map do |idx|
-          # skip the default index
-          next if idx['key'].keys == ['_id']
-
-          index = { 'key' => idx['key'].keys }
-          index['unique'] = true if idx['unique']
-          index
-        end.compact
       end
     end
   end

@@ -4,7 +4,7 @@ module Dataflow
     # Interface between a data node and mongodb.
     # We use mongodb to perform all the store/retrieve operations.
     class PsqlAdapter < SqlAdapter
-      def fetch_table_usage(dataset:)
+      def usage(dataset:)
         size = client["SELECT pg_relation_size('#{dataset}') as size"].first[:size]
         {
           memory: size,

@@ -69,6 +69,7 @@ module Dataflow
       # internal use: where to read/write from. Use 1 and 2 for legacy reasons.
       field :read_dataset_idx,     type: Integer,   editable: false, default: 1
       field :write_dataset_idx,    type: Integer,   editable: false, default: 2
+      field :double_buffer_prefix, type: String,    editable: false, default: 'buffer'
 
       # Necessary fields:
       validates_presence_of :db_name
@@ -234,7 +235,7 @@ module Dataflow
         return @temporary_read_dataset if @temporary_read_dataset
 
         if use_double_buffering
-          "#{name}_buffer#{read_dataset_idx}"
+          "#{name}_#{double_buffer_prefix}#{read_dataset_idx}"
         else
           name
         end
@@ -242,7 +243,7 @@ module Dataflow
 
       def write_dataset_name
         if use_double_buffering
-          "#{name}_buffer#{write_dataset_idx}"
+          "#{name}_#{double_buffer_prefix}#{write_dataset_idx}"
         else
           name
         end
@@ -421,7 +422,7 @@ module Dataflow
 
       def valid_dataset_names
         if use_double_buffering
-          ["#{name}_buffer1", "#{name}_buffer2"]
+          ["#{name}_#{double_buffer_prefix}#{read_dataset_idx}", "#{name}_#{double_buffer_prefix}#{write_dataset_idx}"]
         else
           [name]
         end

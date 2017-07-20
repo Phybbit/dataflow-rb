@@ -373,7 +373,7 @@ module Dataflow
         raise "Called #restore_dataset with incompatible datasets settings: #{filepath} contains a double buffer dataset but node '#{name}' is expecting a single buffered one." if read_idx > 0 && !use_double_buffering
 
         if use_double_buffering
-          dataset_name = valid_dataset_names[read_idx - 1]
+          dataset_name = dataset_name_for_buffer(read_idx)
         else
           dataset_name = name
         end
@@ -422,10 +422,14 @@ module Dataflow
 
       def valid_dataset_names
         if use_double_buffering
-          ["#{name}_#{double_buffer_prefix}#{read_dataset_idx}", "#{name}_#{double_buffer_prefix}#{write_dataset_idx}"]
+          [dataset_name_for_buffer(read_dataset_idx), dataset_name_for_buffer(write_dataset_idx)]
         else
           [name]
         end
+      end
+
+      def dataset_name_for_buffer(idx)
+        "#{name}_#{double_buffer_prefix}#{idx}"
       end
 
       def logger

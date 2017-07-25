@@ -43,12 +43,26 @@ module Dataflow
             # TODO: re-enabled event on_export_progressed
             # progress = (idx / queries.count.to_f * 100).ceil
             # on_export_progressed(pct_complete: progress)
-            batch = node.all(where: query.merge(where), fields: sch.keys, sort: { system_id => 1 })
+
+            fields = transform_fields(node.db_backend, sch.keys)
+
+            batch = node.all(where: query.merge(where), fields: fields, sort: { system_id => 1 })
             csv_adapter.save(records: batch, part: idx.to_s.rjust(queries.count.to_s.length, "0"))
           end
 
           # needed by the csv exporter to finalize in a single file
           csv_adapter.on_save_finished
+        end
+
+        # Transform the keys to the field that need to be selected on the backend.
+        # That's a fix meant especially for selecting nested values on mongo
+        def transform_fields(db_backend, keys)
+          return keys unless db_backend == :mongodb
+
+          # replace the separator with a dot and make sure we don't select individual
+          # array keys... it seems to breakdown mongodb
+          keys.map { |k| k.gsub(Dataflow::SchemaMixin::SEPARATOR, '.') }
+              .map { |k| k.gsub(/\.[0-9]+/, '') }.uniq
         end
       end
     end

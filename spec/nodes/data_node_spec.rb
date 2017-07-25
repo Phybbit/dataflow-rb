@@ -58,7 +58,7 @@ RSpec.describe Dataflow::Nodes::DataNode, type: :model do
 
   describe '#export' do
     let (:data) do
-      [{ 'a' => 1, 'b' => 'test' }]
+      [{ 'a' => 1, 'b' => 'test', 'deep' => { 'nested' => 'value', 'array' => [0,1,2] }}]
     end
 
     before do
@@ -67,7 +67,7 @@ RSpec.describe Dataflow::Nodes::DataNode, type: :model do
 
     it 'exports to a different backend' do
       node.export(connection_opts: { db_backend: :csv })
-      expect(csv_node.all).to eq data
+      expect(csv_node.all).to eq([{'a' => 1, 'b' => 'test', 'deep|nested' => 'value', 'deep|array|0' => 0, 'deep|array|1' => 1, 'deep|array|2' => 2}])
     end
 
     it 'calls the export_started evt' do

@@ -35,7 +35,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'parallel',         '~>1.10'
   spec.add_dependency 'mongoid',          '~>6.0'
   spec.add_dependency 'sequel',           '~>4.0'
-  spec.add_dependency 'mysql2',           '~>0.4'
+  spec.add_dependency 'mysql2',           '>=0.3'
   spec.add_dependency 'pg',               '~>0.21'
   spec.add_dependency 'sequel_pg',        '~>1.7'
   spec.add_dependency 'msgpack',          '~>1.0'

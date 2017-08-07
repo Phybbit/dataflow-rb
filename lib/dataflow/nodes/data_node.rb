@@ -173,7 +173,7 @@ module Dataflow
       #   process(node.all(where: query))
       # end
       def ordered_system_id_queries(batch_size:, where: {})
-        db_adapter.ordered_system_id_queries(batch_size: batch_size, where: {})
+        db_adapter.ordered_system_id_queries(batch_size: batch_size, where: where)
       end
 
       # Counts how many records matches the condition or all if no condition is given.

@@ -319,6 +319,20 @@ RSpec.describe Dataflow::Nodes::DataNode, type: :model do
     end
   end
 
+  describe '#ordered_system_id_queries' do
+    before do
+      node.add(records: [{id: 1, value: 1}, {id: 2, value: 2}])
+    end
+
+    it 'returns system id queries' do
+      expect(node.ordered_system_id_queries(batch_size: 1).count).to eq(2)
+    end
+
+    it 'supports the filtering with a query' do
+      expect(node.ordered_system_id_queries(batch_size: 1, where: {value: 1}).count).to eq(1)
+    end
+  end
+
   let(:node) { make_data_node('node') }
 
   let(:csv_node) do

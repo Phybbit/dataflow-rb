@@ -16,6 +16,15 @@ RSpec.describe Dataflow::Adapters::PsqlAdapter, type: :model do
     end
   end
 
+  def create_test_dataset_with_defaults
+    client.create_table dataset_with_defaults do
+      primary_key :_id
+      column(:another_auto_inc_id, 'SERIAL')
+      column(:int_with_default_value, 'SMALLINT DEFAULT 0')
+      column(:int, 'SMALLINT')
+    end
+  end
+
   context 'selection' do
     before do
       create_test_dataset
@@ -66,6 +75,19 @@ RSpec.describe Dataflow::Adapters::PsqlAdapter, type: :model do
     include_examples 'adapter #save', use_sym: true
     include_examples 'adapter #delete', use_sym: true
 
+    it 'only writes the given values' do
+      create_test_dataset_with_defaults
+
+      adapter_with_defaults.save(records: [{int: 1}])
+
+      expected = [{
+        another_auto_inc_id: 1,
+        int_with_default_value: 0,
+        int: 1
+      }]
+      expect(adapter_with_defaults.all).to eq(expected)
+    end
+
   end
 
   describe '.disconnect_clients' do
@@ -110,6 +132,7 @@ RSpec.describe Dataflow::Adapters::PsqlAdapter, type: :model do
   let(:client) { PostgresqlTestClient }
   let(:db_name) { 'dataflow_test' }
   let(:dataset_name) { 'test_table' }
+  let(:dataset_with_defaults) { 'test_table_with_defaults' }
   let(:indexes) { [
       { 'key' => 'id' },
       { 'key' => 'updated_at' },
@@ -126,11 +149,15 @@ RSpec.describe Dataflow::Adapters::PsqlAdapter, type: :model do
     ]
   }
   let(:data_node) {
-    Dataflow::Nodes::DataNode.new({db_name: db_name,
-                                   name: dataset_name,
-                                   indexes: indexes})
+    Dataflow::Nodes::DataNode.new(db_name: db_name, name: dataset_name, indexes: indexes)
   }
   let(:adapter) {
     Dataflow::Adapters::PsqlAdapter.new(data_node: data_node, adapter_type: 'postgresql')
+  }
+  let(:data_node_with_defaults) {
+    Dataflow::Nodes::DataNode.new(db_name: db_name, name: dataset_with_defaults, indexes: indexes)
+  }
+  let(:adapter_with_defaults) {
+    Dataflow::Adapters::PsqlAdapter.new(data_node: data_node_with_defaults, adapter_type: 'postgresql')
   }
 end

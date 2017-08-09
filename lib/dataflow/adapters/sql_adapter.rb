@@ -34,7 +34,7 @@ module Dataflow
             db.run("CREATE DATABASE #{db_name}")
             true
           end
-        rescue Sequel::DatabaseError => e
+        rescue Sequel::DatabaseError => _e
           # ignore error
           false
         end
@@ -145,10 +145,13 @@ module Dataflow
       def save(records:, replace_by: nil)
         dataset_name = settings.write_dataset_name.to_sym
         dataset = client[dataset_name]
-        columns = dataset.columns.reject { |x| x == SYSTEM_ID }
+        columns = dataset.columns.reject { |x| x == SYSTEM_ID }.to_set
+        used_keys = records.map { |record| record.keys.to_set }.reduce(:+)
+        used_columns = columns.intersection(used_keys).to_a
+
 
         tabular_data = records.map do |record|
-          columns.map { |col| record[col] }
+          used_columns.map { |col| record[col] }
         end
 
         if replace_by.present?
@@ -156,13 +159,13 @@ module Dataflow
 
           # On conflict update every field. On Postgresql we can refer
           # to the "conflicting" rows using the "excluded_" prefix:
-          update_clause = columns.map { |k| [k, Sequel.qualify('excluded', k)] }.to_h
+          update_clause = used_columns.map { |k| [k, Sequel.qualify('excluded', k)] }.to_h
           dataset
             .insert_conflict(target: index_keys, update: update_clause)
-            .import(columns, tabular_data)
+            .import(used_columns, tabular_data)
         else
           # ignore insert conflicts
-          dataset.insert_ignore.import(columns, tabular_data)
+          dataset.insert_ignore.import(used_columns, tabular_data)
         end
       end
 

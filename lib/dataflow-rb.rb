@@ -94,6 +94,11 @@ module Dataflow
     # and all the compute node's datasets
     all_nodes += all_nodes.select { |x| x.is_a?(Dataflow::Nodes::ComputeNode) }
                           .map { |x| x.data_node }
+
+    # sort by dependency level so that we can re-create without problems
+    # in the import step
+    all_nodes = all_nodes.sort_by { |n| n.dependency_level }
+
     # get all the nodes' metadata in the yaml format
     metadata_yaml = all_nodes.compact.uniq.map(&:metadata).to_yaml
     File.write("#{tmp_dir}/metadata.yaml", metadata_yaml)

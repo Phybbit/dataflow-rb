@@ -31,7 +31,29 @@ module Dataflow
     end
 
     def all_dependencies
-      []
+      metadata.select { |k, v| k != :_id && v.is_a?(BSON::ObjectId) }.flat_map { |_, node_id|
+          # It's most likely a Node.
+          # Let's find out and if it is
+          begin
+            Dataflow::Node.find(node_id).all_dependencies
+          rescue StandardError => _e
+            # It seems like it is not a node
+            nil
+          end
+      }.compact + [self]
+    end
+
+    def dependency_level(current_level = 0)
+      lvl = all_dependencies.map { |node|
+        if node == self
+          current_level
+        else
+          node.dependency_level(current_level) + 1
+        end
+      }.max.to_i
+
+      # if there is any dependency, it will be more than 0, else 0
+      lvl
     end
 
     def required_by

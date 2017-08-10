@@ -319,6 +319,22 @@ RSpec.describe Dataflow::Nodes::DataNode, type: :model do
     end
   end
 
+  describe '#dependency_level' do
+    it 'returns 0' do
+      expect(node.dependency_level).to eq(0)
+    end
+
+    it 'returns 1 because of direcly referencing another node' do
+      class RefNode < Dataflow::Nodes::DataNode
+        field :some_node_id, type: BSON::ObjectId
+        field :not_a_node_id, type: BSON::ObjectId
+      end
+
+      lvl = RefNode.new(some_node_id: node.id, not_a_node_id: BSON::ObjectId.new).dependency_level
+      expect(lvl).to eq(1)
+    end
+  end
+
   describe '#ordered_system_id_queries' do
     before do
       node.add(records: [{id: 1, value: 1}, {id: 2, value: 2}])

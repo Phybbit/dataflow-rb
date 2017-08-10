@@ -147,7 +147,22 @@ module Dataflow
 
       # retrieve the whole dependency tree
       def all_dependencies
-        (dependencies + dependencies.flat_map(&:all_dependencies)).uniq
+        (super + dependencies + dependencies.flat_map(&:all_dependencies)).uniq
+      end
+
+      # Finds out how many "layers" how dependencies this node relies on.
+      # This is useful to sort nodes by dependency levels:
+      # we're sure that a node of dependency_level 0 comes before than a node
+      # of dependency level 1, which comes before a level 2 and etc.
+      # On the basic case, the dependency_level of a compute node is equal
+      # to the maximum dependency level of any of it's dependencies + 1.
+      def dependency_level(current_level = 0)
+        # find out the max dependency based on fields that may be node ids
+        max_lvl = super(current_level)
+        # find out the max deps based on the direct compute dependencies
+        deps_lvl = dependencies.map { |x| x.dependency_level(current_level) + 1 }.max.to_i
+
+        [max_lvl, deps_lvl].max
       end
 
       # Returns false if any of our dependencies has

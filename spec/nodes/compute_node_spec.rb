@@ -319,6 +319,13 @@ RSpec.describe Dataflow::Nodes::ComputeNode, type: :model do
     end
   end
 
+  describe '#dependency_level' do
+    it 'returns +1 on top of the last dependency level' do
+      expect(older_dependency.dependency_level).to eq(1)
+      expect(compute_node.dependency_level).to eq(2)
+    end
+  end
+
   describe '.properties' do
     it 'includes parent properties' do
       expect(NOOPComputeNode.properties[:name]).not_to be nil

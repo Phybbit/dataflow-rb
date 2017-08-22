@@ -433,7 +433,7 @@ module Dataflow
         limit = limit_per_process.to_i
         count_per_process = [limit, equal_split_per_process].min if limit > 0
 
-        queries = node.ordered_system_id_queries(batch_size: count_per_process, where: where)
+        node.ordered_system_id_queries(batch_size: count_per_process, where: where)
       end
 
       def acquire_computing_lock!

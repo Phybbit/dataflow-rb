@@ -97,7 +97,7 @@ module Dataflow
 
     # sort by dependency level so that we can re-create without problems
     # in the import step
-    all_nodes = all_nodes.sort_by { |n| n.dependency_level }
+    all_nodes = all_nodes.uniq.sort_by { |n| n.dependency_level }
 
     # get all the nodes' metadata in the yaml format
     metadata_yaml = all_nodes.compact.uniq.map(&:metadata).to_yaml

@@ -31,7 +31,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'dotenv'
 
   spec.add_dependency 'activesupport',    '>= 4.0.0'
-  spec.add_dependency 'schema-inference', '~>1.2.1'
+  spec.add_dependency 'schema-inference', '~>1.3.0'
   spec.add_dependency 'parallel',         '~>1.10'
   spec.add_dependency 'mongoid',          '>=5.0'
   spec.add_dependency 'sequel',           '~>4.0'

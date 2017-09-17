@@ -13,7 +13,15 @@ module Dataflow
           @clients ||= {}
           connection_uri = settings.connection_uri_or_default
           full_uri = "#{connection_uri}/#{settings.db_name}?encoding=utf8"
-          return @clients[full_uri] if @clients[full_uri].present?
+
+          db = @clients[full_uri]
+          if db.present?
+            conn = db.synchronize{|c| c}
+            return db if db.valid_connection?(conn)
+
+            db.disconnect(conn)
+            @clients[full_uri] = nil
+          end
 
           # first, make sure the DB is created (if it is not an external db)
           is_external_db = settings.connection_uri.present?

@@ -263,7 +263,7 @@ module Dataflow
           else
             # e.g. simple match { 'id' => 1} or IN clauses { 'id' => [1,2] }
             # are supported with simples hashes
-            [[{ k.to_sym => v }]]
+            [[{ Sequel.lit("#{k}") => v }]]
           end
         end
       end

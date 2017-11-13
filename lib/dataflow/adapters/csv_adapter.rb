@@ -86,7 +86,7 @@ module Dataflow
         # prepare the data
         key_tokens = keys.map { |key| record_dig_tokens(key: key) }
         rows = data.map do |datum|
-          key_tokens.map { |tokens| datum.dig(*tokens) }
+          key_tokens.map { |tokens| serialize(datum.dig(*tokens)) }
         end
 
         # dump in a part file
@@ -118,6 +118,16 @@ module Dataflow
           delete_file(file)
         end
       end
+
+      def serialize(value)
+        case value
+        when Time, DateTime, Date
+          value.iso8601
+        else
+          value
+        end
+      end
+
     end
   end
 end

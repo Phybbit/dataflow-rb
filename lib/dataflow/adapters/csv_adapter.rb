@@ -49,6 +49,7 @@ module Dataflow
 
       def on_save_finished
         write_single_csv(keys: @schema.keys)
+        file_path # return the file path
       end
 
       def remove(_opts = {})

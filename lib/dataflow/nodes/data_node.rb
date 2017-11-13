@@ -277,13 +277,17 @@ module Dataflow
 
       def export(connection_opts: { db_backend: :csv }, keys: [], where: {})
         on_export_started(connection_opts: connection_opts, keys: keys)
+
         # instanciate and export without saving anything
-        Export::ToCsvNode.new(
+        path = Export::ToCsvNode.new(
           dependency_ids: [self],
           query: where.to_json,
           keys: keys
         ).compute_impl
+
         on_export_finished
+
+        path
       end
 
       # retrieves some informations about this node and its usage

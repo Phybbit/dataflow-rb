@@ -36,7 +36,7 @@ module Dataflow
           equal_split_per_process = (data_count / Parallel.processor_count.to_f).ceil
           count_per_process = [max_per_process, equal_split_per_process].min
 
-          queries = node.ordered_system_id_queries(batch_size: count_per_process)
+          queries = node.ordered_system_id_queries(batch_size: count_per_process, where: where)
           system_id = node.send(:db_adapter).class::SYSTEM_ID
 
           parallel_each(queries.each_with_index) do |query, idx|

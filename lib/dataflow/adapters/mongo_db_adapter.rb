@@ -13,7 +13,7 @@ module Dataflow
           settings.adapter_type = 'mongodb'
           connection_uri = settings.connection_uri_or_default
           db_name ||= settings.db_name
-          @clients["#{connection_uri}.#{db_name}"] ||= Mongo::Client.new([connection_uri], database: db_name)
+          @clients["#{connection_uri}.#{db_name}"] ||= Mongo::Client.new([connection_uri], database: db_name, wait_queue_timeout: 5)
         end
 
         def admin_client(settings)

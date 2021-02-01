@@ -13,6 +13,7 @@ module Dataflow
           settings.adapter_type = 'mongodb'
           connection_uri = settings.connection_uri_or_default
           db_name ||= settings.db_name
+          # TODO: preapare an API that can set Mongoid config
           @clients["#{connection_uri}.#{db_name}"] ||= Mongo::Client.new([connection_uri], database: db_name)
         end
 
